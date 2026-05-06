@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
@@ -9,363 +8,29 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#1A0A0A">
 <title>PegPão — Estoque</title>
-<link rel="icon" href="logo.png" type="image/png">
-<link rel="apple-touch-icon" href="logo.png">
+<link rel="icon" href="assets/logo.png" type="image/png">
+<link rel="apple-touch-icon" href="assets/logo.png">
+<link rel="stylesheet" href="css/style.css">
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-check-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<style>
-:root {
-  --bg:#120506;--surface:#1A0A0A;--surface2:#221010;--surface3:#2a1414;
-  --border:#3d1c1c;--border2:#5a2626;
-  --text:#f5ece8;--text2:#c9a89e;--muted:#7a5252;
-  --primary:#7D1A1A;--primary-dim:rgba(125,26,26,.18);--primary-glow:rgba(125,26,26,.40);
-  --gold:#C9A84C;--gold-dim:rgba(201,168,76,.14);--gold-glow:rgba(201,168,76,.30);
-  --green:#4caf6e;--green-dim:rgba(76,175,110,.14);
-  --red:#e05252;--red-dim:rgba(224,82,82,.14);
-  --amber:#d4943a;--amber-dim:rgba(212,148,58,.14);
-  --blue:#5b8dee;--blue-dim:rgba(91,141,238,.14);
-  --nav:60px;--r:14px;
-  --card-grad:linear-gradient(145deg,#1A0A0A 0%,#1f0d0d 100%);
-}
-body.light{
-  --bg:#f5f0ee;--surface:#fff;--surface2:#f0e8e6;--surface3:#e5d8d5;
-  --border:#d5c0bc;--border2:#c0a49e;
-  --text:#1a0808;--text2:#5a2828;--muted:#9a6a60;
-  --card-grad:linear-gradient(145deg,#fff,#faf4f2)
-}
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);min-height:100dvh;padding-top:var(--nav);overscroll-behavior:none;-webkit-text-size-adjust:100%;touch-action:manipulation;
-background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E")}
-
-/* ══ AUTH LOADING ══ */
-#auth-loading{position:fixed;inset:0;z-index:9998;background:var(–bg);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px}
-.spinner{width:40px;height:40px;border:3px solid var(–border2);border-top-color:var(–gold);border-radius:50%;animation:spin .8s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-.auth-loading-txt{font-size:13px;color:var(–muted);font-weight:600}
-
-/* ══ LOGIN ══ */
-#login-screen{position:fixed;inset:0;z-index:9999;background:var(–bg);display:flex;align-items:center;justify-content:center;padding:20px}
-.login-box{width:100%;max-width:360px;background:var(–card-grad);border:1px solid var(–border2);border-radius:24px;padding:44px 32px 36px;text-align:center;box-shadow:0 0 0 1px rgba(201,168,76,.08),0 24px 60px rgba(0,0,0,.6);position:relative;overflow:hidden}
-.login-box::before{content:’’;position:absolute;top:0;left:10%;right:10%;height:2px;background:linear-gradient(90deg,transparent,var(–gold),transparent)}
-.login-logo{width:130px;height:auto;margin:0 auto 18px;display:block;filter:drop-shadow(0 4px 20px rgba(201,168,76,.35))}
-.login-box h2{font-size:19px;font-weight:800;letter-spacing:.3px;margin-bottom:2px}
-.login-box p{font-size:11px;color:var(–muted);margin-bottom:28px}
-.login-box .field{text-align:left}
-.login-box .field label{display:block;font-size:10px;font-weight:700;color:var(–muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px}
-#login-error{color:var(–red);font-size:12px;margin-top:10px;display:none}
-
-/* ══ SELECIONAR PADARIA (tela dono) ══ */
-#padaria-select-screen{position:fixed;inset:0;z-index:9990;background:var(–bg);display:none;flex-direction:column;align-items:center;padding:60px 20px 30px;overflow-y:auto}
-.psel-header{text-align:center;margin-bottom:30px}
-.psel-logo{width:90px;height:auto;margin:0 auto 14px;display:block;filter:drop-shadow(0 4px 14px rgba(201,168,76,.3))}
-.psel-title{font-size:20px;font-weight:800;margin-bottom:4px}
-.psel-sub{font-size:12px;color:var(–muted)}
-.psel-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%;max-width:480px}
-.psel-card{background:var(–card-grad);border:1px solid var(–border);border-radius:16px;padding:18px 14px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden;text-align:center}
-.psel-card:hover{border-color:var(–gold);transform:translateY(-2px);box-shadow:0 8px 30px rgba(201,168,76,.15)}
-.psel-card.coming-soon{opacity:.55;cursor:not-allowed}
-.psel-card.coming-soon:hover{transform:none;border-color:var(–border);box-shadow:none}
-.psel-card::before{content:’’;position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(–gold-glow),transparent);opacity:0;transition:opacity .2s}
-.psel-card:hover::before{opacity:1}
-.psel-ico{font-size:26px;margin-bottom:8px}
-.psel-nome{font-size:13px;font-weight:800;margin-bottom:3px;line-height:1.2}
-.psel-cidade{font-size:10px;color:var(–muted);text-transform:uppercase;letter-spacing:.8px}
-.psel-coming{font-size:10px;color:var(–amber);font-weight:700;margin-top:4px;background:var(–amber-dim);border-radius:6px;padding:2px 8px;display:inline-block}
-.psel-alerts{display:flex;gap:6px;justify-content:center;margin-top:8px;flex-wrap:wrap}
-.psel-badge-mini{font-size:9px;font-weight:700;padding:2px 7px;border-radius:8px;font-family:‘JetBrains Mono’,monospace}
-.psel-logout{margin-top:24px;font-size:12px;color:var(–muted);cursor:pointer;padding:8px 20px;border:1px solid var(–border);border-radius:20px;background:transparent;transition:all .2s}
-.psel-logout:hover{border-color:var(–red);color:var(–red)}
-
-/* ══ DONO DASHBOARD CONSOLIDADO ══ */
-#dono-dash-screen{position:fixed;inset:0;z-index:9985;background:var(–bg);display:none;flex-direction:column}
-.dono-nav{background:var(–surface);border-bottom:1px solid var(–border);padding:0 16px;height:56px;display:flex;align-items:center;gap:12px;position:relative;flex-shrink:0}
-.dono-nav img{width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 6px var(–gold-glow))}
-.dono-nav-title{font-size:14px;font-weight:800;flex:1}
-.dono-nav-sub{font-size:10px;color:var(–muted)}
-.dono-tabs{display:flex;gap:0;background:var(–surface);border-bottom:1px solid var(–border);overflow-x:auto;scrollbar-width:none;flex-shrink:0}
-.dono-tabs::-webkit-scrollbar{display:none}
-.dono-tab{padding:10px 16px;font-size:11px;font-weight:700;color:var(–muted);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:all .2s;text-transform:uppercase;letter-spacing:.6px}
-.dono-tab.active{color:var(–gold);border-bottom-color:var(–gold)}
-.dono-body{flex:1;overflow-y:auto;padding:20px 16px 80px}
-.dono-page{display:none}
-.dono-page.active{display:block;animation:fadeUp .2s ease}
-/* Cards de padaria no painel dono */
-.rede-grid{display:grid;grid-template-columns:1fr;gap:12px}
-.rede-card{background:var(–card-grad);border:1px solid var(–border);border-radius:14px;padding:16px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
-.rede-card:hover{border-color:var(–gold);box-shadow:0 4px 20px rgba(201,168,76,.1)}
-.rede-card.coming{opacity:.55;cursor:not-allowed}
-.rede-card-header{display:flex;align-items:center;gap:10px;margin-bottom:12px}
-.rede-card-ico{width:38px;height:38px;background:var(–primary-dim);border:1px solid rgba(125,26,26,.3);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
-.rede-card-nome{font-size:14px;font-weight:800}
-.rede-card-sub{font-size:10px;color:var(–muted);text-transform:uppercase;letter-spacing:.7px}
-.rede-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.rede-metric{background:var(–surface2);border-radius:8px;padding:8px 10px;text-align:center}
-.rede-metric .rm-v{font-size:18px;font-weight:800;font-family:‘JetBrains Mono’,monospace}
-.rede-metric .rm-l{font-size:9px;color:var(–muted);text-transform:uppercase;letter-spacing:.6px;margin-top:2px}
-.rede-enter-btn{position:absolute;top:14px;right:14px;background:var(–gold-dim);border:1px solid rgba(201,168,76,.3);border-radius:8px;padding:5px 12px;font-size:10px;font-weight:700;color:var(–gold);cursor:pointer;transition:all .2s}
-.rede-enter-btn:hover{background:rgba(201,168,76,.25)}
-/* Voltar ao painel dono */
-.btn-voltar-rede{display:none;align-items:center;gap:6px;font-size:11px;font-weight:700;color:var(–gold);cursor:pointer;padding:6px 12px;border:1px solid rgba(201,168,76,.3);border-radius:8px;background:var(–gold-dim);transition:all .2s;margin-left:auto}
-.btn-voltar-rede:hover{background:rgba(201,168,76,.22)}
-
-/* ══ NAV ══ */
-.nav{position:fixed;top:0;left:0;right:0;height:var(–nav);background:var(–surface);border-bottom:1px solid var(–border);display:none;align-items:stretch;z-index:1000;overflow-x:auto;scrollbar-width:none;box-shadow:0 1px 0 var(–border),0 2px 20px rgba(0,0,0,.35)}
-.nav::after{content:’’;position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent 0%,var(–gold-glow) 40%,var(–gold-glow) 60%,transparent 100%);opacity:.5}
-.nav::-webkit-scrollbar{display:none}
-.nav-logo{display:flex;align-items:center;padding:0 14px;border-right:1px solid var(–border);flex-shrink:0;gap:8px}
-.nav-logo img{width:28px;height:28px;object-fit:contain;filter:drop-shadow(0 0 6px var(–gold-glow))}
-.nav-padaria-label{font-size:10px;font-weight:800;color:var(–gold);text-transform:uppercase;letter-spacing:.5px;max-width:90px;line-height:1.2}
-.nav-item{display:flex;align-items:center;gap:5px;padding:0 13px;font-size:11px;font-weight:700;color:var(–muted);cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;transition:all .2s;text-transform:uppercase;letter-spacing:.7px;position:relative}
-.nav-item:hover{color:var(–text2)}
-.nav-item.active{color:var(–gold);border-bottom-color:var(–gold)}
-.nav-badge{position:absolute;top:10px;right:6px;width:7px;height:7px;background:var(–red);border-radius:50%;border:2px solid var(–surface);animation:pulse 2s infinite;display:none}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-
-/* ══ LAYOUT ══ */
-.container{max-width:700px;margin:auto;padding:24px 16px 90px}
-.page{display:none}
-.page.active{display:block;animation:fadeUp .22s ease}
-@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
-
-/* ══ PAGE HEADER ══ */
-.page-header{display:flex;align-items:center;gap:12px;margin-bottom:20px}
-.page-header-ico{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
-.ico-gold{background:var(–gold-dim);border:1px solid rgba(201,168,76,.25)}
-.ico-green{background:var(–green-dim);border:1px solid rgba(76,175,110,.25)}
-.ico-red{background:var(–red-dim);border:1px solid rgba(224,82,82,.25)}
-.ico-blue{background:var(–blue-dim);border:1px solid rgba(91,141,238,.25)}
-.ico-primary{background:var(–primary-dim);border:1px solid rgba(125,26,26,.3)}
-.page-header-title{font-size:18px;font-weight:800}
-.page-header-sub{font-size:12px;color:var(–muted);margin-top:1px}
-
-/* ══ CARD ══ */
-.card{background:var(–card-grad);border:1px solid var(–border);border-radius:var(–r);padding:20px;margin-bottom:14px;position:relative;overflow:hidden}
-.card.accent-gold::before,.card.accent-green::before,.card.accent-red::before,.card.accent-blue::before,.card.accent-primary::before{content:’’;position:absolute;left:0;top:12px;bottom:12px;width:2px;border-radius:2px}
-.card.accent-gold::before{background:linear-gradient(180deg,transparent,var(–gold),transparent)}
-.card.accent-green::before{background:linear-gradient(180deg,transparent,var(–green),transparent)}
-.card.accent-red::before{background:linear-gradient(180deg,transparent,var(–red),transparent)}
-.card.accent-blue::before{background:linear-gradient(180deg,transparent,var(–blue),transparent)}
-.card.accent-primary::before{background:linear-gradient(180deg,transparent,var(–primary),transparent)}
-.card-title{font-size:10px;font-weight:700;color:var(–muted);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:16px;display:flex;align-items:center;gap:6px}
-.card-title::before{content:’’;display:inline-block;width:10px;height:1px;background:var(–gold);opacity:.6}
-
-/* ══ DASHBOARD ══ */
-.dash-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
-.dash-box{background:var(–card-grad);border:1px solid var(–border);border-radius:12px;padding:16px;cursor:pointer;transition:border-color .2s}
-.dash-box:hover{border-color:var(–border2)}
-.dash-box .dl{font-size:10px;color:var(–muted);text-transform:uppercase;letter-spacing:.8px;font-weight:700;margin-bottom:6px}
-.dash-box .dv{font-size:26px;font-weight:800;font-family:‘JetBrains Mono’,monospace}
-.dash-box .ds{font-size:11px;color:var(–muted);margin-top:4px}
-.dv.green{color:var(–green)}.dv.red{color:var(–red)}.dv.gold{color:var(–gold)}.dv.amber{color:var(–amber)}
-.dash-alert{background:var(–red-dim);border:1px solid rgba(224,82,82,.3);border-radius:12px;padding:14px 16px;margin-bottom:12px;display:none}
-.dash-alert-title{font-size:11px;font-weight:700;color:var(–red);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px}
-.dash-alert-item{font-size:13px;padding:4px 0;border-bottom:1px solid rgba(224,82,82,.15);display:flex;justify-content:space-between}
-.dash-alert-item:last-child{border-bottom:none}
-.dash-low{background:var(–amber-dim);border:1px solid rgba(212,148,58,.3);border-radius:12px;padding:14px 16px;margin-bottom:12px;display:none}
-.dash-low-title{font-size:11px;font-weight:700;color:var(–amber);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px}
-.recent-log{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(–border)}
-.recent-log:last-child{border-bottom:none}
-.recent-log-nome{font-size:13px;font-weight:600}
-.recent-log-hora{font-size:11px;color:var(–muted);font-family:‘JetBrains Mono’,monospace}
-
-/* ══ INPUTS ══ */
-.field{margin-bottom:12px}
-.field label{display:block;font-size:10px;font-weight:700;color:var(–muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px}
-input[type=text],input[type=password],input[type=number],input[type=date],input[type=email],select,textarea{width:100%;padding:12px 14px;background:var(–surface2);border:1px solid var(–border);border-radius:10px;color:var(–text);font-family:‘Sora’,sans-serif;font-size:14px;transition:border-color .2s,box-shadow .2s;appearance:none}
-textarea{resize:vertical;min-height:70px}
-input:focus,select:focus,textarea:focus{outline:none;border-color:var(–gold);box-shadow:0 0 0 3px var(–gold-dim)}
-input::placeholder,textarea::placeholder{color:var(–muted);font-size:13px}
-select option{background:var(–surface2)}
-
-/* ══ AUTOCOMPLETE ══ */
-.ac-wrap{position:relative}
-.ac-list{position:absolute;top:calc(100% + 5px);left:0;right:0;background:var(–surface2);border:1px solid var(–gold);border-radius:12px;z-index:600;max-height:240px;overflow-y:auto;display:none;box-shadow:0 8px 40px rgba(0,0,0,.5)}
-.ac-item{padding:11px 16px;cursor:pointer;border-bottom:1px solid var(–border);display:flex;justify-content:space-between;align-items:center;transition:background .12s}
-.ac-item:last-child{border-bottom:none}
-.ac-item:hover,.ac-item.sel{background:var(–gold-dim)}
-.ac-name{font-weight:700;font-size:13px;margin-bottom:2px}
-.ac-code{font-size:10px;color:var(–muted);font-family:‘JetBrains Mono’,monospace}
-
-/* ══ BUTTONS ══ */
-.btn{width:100%;padding:14px;border:none;border-radius:10px;color:#fff;font-weight:700;cursor:pointer;font-size:13px;font-family:‘Sora’,sans-serif;letter-spacing:.8px;transition:filter .15s,transform .1s;text-transform:uppercase;position:relative;overflow:hidden}
-.btn::after{content:’’;position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.08) 0%,transparent 60%);pointer-events:none}
-.btn:active{transform:scale(.98)}
-.btn:hover{filter:brightness(1.08)}
-.btn-gold{background:linear-gradient(135deg,#b8932c,var(–gold));color:#1a1400}
-.btn-primary{background:linear-gradient(135deg,#5a1010,var(–primary))}
-.btn-green{background:linear-gradient(135deg,#2e8b4e,var(–green))}
-.btn-red{background:linear-gradient(135deg,#b83232,var(–red))}
-.btn-blue{background:linear-gradient(135deg,#3a6acc,var(–blue))}
-.btn-ghost{background:transparent;border:1px solid var(–border2);color:var(–text2)}
-.btn-ghost:hover{border-color:var(–gold);color:var(–gold);filter:none}
-.btn-sm{padding:7px 14px;font-size:12px;border-radius:8px;width:auto;letter-spacing:.4px}
-
-/* ══ BADGE ══ */
-.badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;font-family:‘JetBrains Mono’,monospace}
-.b-green{background:var(–green-dim);color:var(–green)}
-.b-red{background:var(–red-dim);color:var(–red)}
-.b-yellow{background:var(–amber-dim);color:var(–amber)}
-.b-gray{background:var(–surface3);color:var(–muted)}
-.b-gold{background:var(–gold-dim);color:var(–gold)}
-.b-blue{background:var(–blue-dim);color:var(–blue)}
-.b-primary{background:var(–primary-dim);color:var(–primary)}
-
-/* ══ TABS ══ */
-.tabs{display:flex;gap:3px;background:var(–surface2);padding:4px;border-radius:12px;margin-bottom:16px;border:1px solid var(–border)}
-.tab-btn{flex:1;padding:9px;border:none;border-radius:9px;background:transparent;color:var(–muted);font-family:‘Sora’,sans-serif;font-size:11px;font-weight:700;cursor:pointer;transition:all .2s;text-transform:uppercase;letter-spacing:.5px}
-.tab-btn.active{background:var(–surface3);color:var(–gold);box-shadow:0 1px 6px rgba(0,0,0,.3);border:1px solid rgba(201,168,76,.2)}
-
-/* ══ TABLE ══ */
-.section-label{font-size:10px;font-weight:800;color:var(–muted);text-transform:uppercase;letter-spacing:1.2px;margin:18px 0 8px 2px;display:flex;align-items:center;gap:8px}
-.section-label::after{content:’’;flex:1;height:1px;background:linear-gradient(90deg,var(–border),transparent)}
-table{width:100%;border-collapse:collapse}
-th{font-size:10px;color:var(–muted);font-weight:700;text-transform:uppercase;letter-spacing:.6px;padding:10px 14px;border-bottom:1px solid var(–border);text-align:left}
-td{padding:13px 14px;border-bottom:1px solid var(–border);font-size:13px}
-tr:last-child td{border-bottom:none}
-tr:hover td{background:rgba(201,168,76,.03)}
-.venc{color:var(–red);font-weight:700;animation:blink 1.6s infinite}
-.venc-soon{color:var(–amber);font-weight:600}
-@keyframes blink{50%{opacity:.4}}
-
-/* ══ EDIT BTN ══ */
-.btn-edit{width:26px;height:26px;background:transparent;border:1px solid var(–border);border-radius:7px;cursor:pointer;color:var(–muted);font-size:12px;display:inline-flex;align-items:center;justify-content:center;transition:all .15s}
-.btn-edit:hover{background:var(–gold-dim);border-color:var(–gold);color:var(–gold)}
-
-/* ══ MODAL ══ */
-.modal-bg{position:fixed;inset:0;z-index:8000;background:rgba(0,0,0,.75);backdrop-filter:blur(4px);display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s}
-.modal-bg.open{opacity:1;pointer-events:all}
-.modal-box{background:var(–surface);border:1px solid var(–border2);border-top:1px solid rgba(201,168,76,.25);border-radius:24px 24px 0 0;padding:30px 24px 44px;width:100%;max-width:520px;transform:translateY(40px);transition:transform .32s cubic-bezier(.2,1.1,.4,1);position:relative;max-height:90vh;overflow-y:auto}
-.modal-box::before{content:’’;position:absolute;top:10px;left:50%;transform:translateX(-50%);width:40px;height:4px;background:var(–border2);border-radius:2px}
-.modal-bg.open .modal-box{transform:translateY(0)}
-.modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;margin-top:8px}
-.modal-title{font-size:15px;font-weight:800}
-.modal-close{width:30px;height:30px;border-radius:50%;background:var(–surface2);border:1px solid var(–border);cursor:pointer;color:var(–muted);font-size:16px;display:flex;align-items:center;justify-content:center;transition:all .2s}
-.modal-close:hover{background:var(–red-dim);border-color:var(–red);color:var(–red)}
-.modal-code{font-size:10px;font-family:‘JetBrains Mono’,monospace;color:var(–muted);background:var(–surface2);border:1px solid var(–border);border-radius:6px;padding:3px 10px;margin-bottom:18px;display:inline-block}
-#confirm-modal .modal-box{max-width:380px;margin:auto;border-radius:20px;align-self:center}
-.confirm-msg{font-size:14px;line-height:1.6;margin-bottom:20px;color:var(–text2)}
-.confirm-product{background:var(–surface2);border:1px solid var(–border);border-radius:10px;padding:12px 16px;margin-bottom:20px}
-.confirm-product .cp-nome{font-weight:700;font-size:15px}
-.confirm-product .cp-det{font-size:12px;color:var(–muted);margin-top:4px;font-family:‘JetBrains Mono’,monospace}
-#hist-modal .modal-box{max-width:480px}
-.hist-item{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(–border)}
-.hist-item:last-child{border-bottom:none}
-.hist-nome{font-size:12px;color:var(–muted)}
-.hist-qty{font-family:‘JetBrains Mono’,monospace;font-size:13px;font-weight:700}
-.hist-meta{font-size:11px;color:var(–muted);font-family:‘JetBrains Mono’,monospace}
-
-/* ══ PREVIEW ══ */
-#sai-preview-box{background:var(–surface2);border:1px solid var(–border);border-left:2px solid var(–gold);border-radius:10px;padding:14px;margin-bottom:12px;display:none}
-
-/* ══ SOMA BAR ══ */
-#soma-bar{background:var(–gold-dim);border:1px solid rgba(201,168,76,.3);border-radius:12px;padding:12px 16px;margin-bottom:14px;display:none;align-items:center;justify-content:space-between}
-#soma-bar .s-label{font-size:10px;color:var(–gold);font-weight:700;text-transform:uppercase;letter-spacing:.8px}
-#soma-bar .s-sub{font-size:11px;color:var(–muted);margin-top:2px}
-#soma-bar .s-val{font-family:‘JetBrains Mono’,monospace;font-size:22px;font-weight:700;color:var(–gold)}
-
-/* ══ SEARCH ══ */
-.search-wrap{position:relative;margin-bottom:14px}
-.search-wrap input{padding-left:42px}
-.search-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(–muted);pointer-events:none;font-size:15px}
-
-/* ══ STATS GRID ══ */
-.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
-.stat-box{background:var(–card-grad);border:1px solid var(–border);border-radius:12px;padding:16px;position:relative;overflow:hidden}
-.stat-box .sl{font-size:10px;color:var(–muted);text-transform:uppercase;letter-spacing:.8px;font-weight:700;margin-bottom:8px}
-.stat-box .sv{font-size:28px;font-weight:800;font-family:‘JetBrains Mono’,monospace}
-.sv.green{color:var(–green)}.sv.red{color:var(–red)}
-
-/* ══ PERIOD TABS ══ */
-.period-tabs{display:flex;gap:6px;margin-bottom:16px}
-.pt{padding:7px 16px;border-radius:8px;border:1px solid var(–border);background:transparent;color:var(–muted);cursor:pointer;font-family:‘Sora’,sans-serif;font-size:12px;font-weight:700;transition:all .2s;letter-spacing:.4px}
-.pt.active{background:var(–gold-dim);border-color:var(–gold);color:var(–gold)}
-
-/* ══ RANKING ══ */
-.rank-item{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(–border)}
-.rank-item:last-child{border-bottom:none}
-.rank-n{font-family:‘JetBrains Mono’,monospace;font-size:11px;color:var(–muted);width:18px;text-align:center}
-.rank-bar-wrap{flex:1}
-.rank-nome{font-size:13px;font-weight:600;margin-bottom:5px}
-.rank-bar{height:3px;background:var(–border);border-radius:2px;overflow:hidden}
-.rank-fill{height:100%;border-radius:2px;transition:width .7s ease}
-.rank-qty{font-family:‘JetBrains Mono’,monospace;font-size:13px;font-weight:700;min-width:50px;text-align:right}
-
-/* ══ BARCODE ══ */
-.bc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px}
-.bc-card{background:var(–card-grad);border:1px solid var(–border);border-radius:12px;padding:16px;text-align:center}
-.bc-nome{font-size:12px;font-weight:700;margin-bottom:4px;word-break:break-word}
-.bc-code{font-size:10px;color:var(–muted);font-family:‘JetBrains Mono’,monospace;margin-bottom:8px}
-.bc-saldo{font-size:11px;color:var(–muted);margin-top:8px}
-
-/* ══ QR ══ */
-.qr-wrap{border-radius:12px;overflow:hidden;background:#000;margin-bottom:14px;display:none}
-.qr-toggle{display:inline-flex;align-items:center;gap:7px;font-size:12px;color:var(–gold);cursor:pointer;margin-bottom:14px;font-weight:700;letter-spacing:.4px;padding:7px 14px;border:1px solid rgba(201,168,76,.3);border-radius:8px;background:var(–gold-dim);transition:all .2s}
-
-/* ══ LOG ══ */
-.log-card{background:var(–card-grad);border:1px solid var(–border);border-radius:12px;padding:13px 16px;display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
-.log-hora{font-family:‘JetBrains Mono’,monospace;font-size:11px;color:var(–muted)}
-.log-nome{font-size:13px;font-weight:600}
-.log-qty{font-family:‘JetBrains Mono’,monospace;font-size:15px;font-weight:700}
-.log-obs{font-size:11px;color:var(–muted);margin-top:2px;font-style:italic}
-
-/* ══ USERS ══ */
-.user-item{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(–border)}
-.user-item:last-child{border-bottom:none}
-.user-name{font-weight:700;font-size:14px}
-.user-level{font-size:11px;margin-top:3px}
-.user-actions{display:flex;gap:8px}
-
-/* ══ TOAST ══ */
-#toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(80px);background:var(–surface);border:1px solid var(–border2);padding:12px 22px;border-radius:40px;font-size:13px;font-weight:600;z-index:9000;transition:transform .3s cubic-bezier(.2,1,.4,1);box-shadow:0 8px 40px rgba(0,0,0,.5);white-space:nowrap}
-#toast.show{transform:translateX(-50%) translateY(0)}
-#toast.ok{border-color:var(–green);color:var(–green)}
-#toast.err{border-color:var(–red);color:var(–red)}
-#toast.warn{border-color:var(–amber);color:var(–amber)}
-
-/* ══ THEME / MISC ══ */
-#theme-btn{position:fixed;bottom:24px;right:20px;width:46px;height:46px;background:var(–surface2);border:1px solid var(–border2);border-radius:50%;display:none;align-items:center;justify-content:center;cursor:pointer;font-size:18px;box-shadow:0 4px 20px rgba(0,0,0,.4);z-index:800;transition:transform .2s}
-#theme-btn:hover{transform:scale(1.1)}
-.empty{text-align:center;padding:30px 20px;color:var(–muted);font-size:13px}
-.divider{height:1px;background:var(–border);margin:16px 0}
-.row-2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.recibo-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(–border)}
-.recibo-row:last-child{border-bottom:none}
-.recibo-label{font-size:12px;color:var(–muted);text-transform:uppercase;letter-spacing:.6px;font-weight:700}
-.recibo-val{font-size:15px;font-weight:700;font-family:‘JetBrains Mono’,monospace}
-.forgot-link{font-size:12px;color:var(–muted);cursor:pointer;margin-top:8px;display:inline-block;transition:color .2s}
-.forgot-link:hover{color:var(–gold)}
-#reset-panel{display:none;margin-top:16px;padding:14px;background:var(–surface2);border:1px solid var(–border);border-radius:12px;text-align:left}
-#reset-panel p{font-size:12px;color:var(–muted);line-height:1.6}
-body.modo-operador .nav-item:not([data-tab=“saida”]):not(#btn-nav-logout){display:none!important}
-body.modo-operador .nav-logo{display:none}
-body.modo-operador #sai-data-field{display:none!important}
-#btn-nav-logout:hover{background:var(–red-dim)}
-.low-item{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(–border)}
-.low-item:last-child{border-bottom:none}
-.low-nome{font-size:13px;font-weight:600}
-.low-saldo{font-size:12px;color:var(–red);font-family:‘JetBrains Mono’,monospace;font-weight:700}
-</style>
-
 </head>
 <body>
 
 <!-- AUTH LOADING -->
-
 <div id="auth-loading">
   <div class="spinner"></div>
   <div class="auth-loading-txt">Verificando sessão...</div>
 </div>
 
 <!-- LOGIN -->
-
 <div id="login-screen" style="display:none">
   <div class="login-box">
-    <img src="logo.png" alt="PegPão" class="login-logo" onerror="this.style.fontSize='40px';this.outerHTML='<div style=\'font-size:40px;margin-bottom:14px\'>🍞</div>'">
+    <img src="assets/logo.png" alt="PegPão" class="login-logo"
+         onerror="this.outerHTML='<div style=\'font-size:48px;margin-bottom:14px\'>🍞</div>'">
     <h2>Rede PegPão</h2>
     <p>Sistema de Controle de Estoque</p>
     <div class="field">
@@ -376,95 +41,31 @@ body.modo-operador #sai-data-field{display:none!important}
       <label>Senha</label>
       <input type="password" id="inp-pass" placeholder="••••••••" autocomplete="current-password">
     </div>
-    <button class="btn btn-primary" id="btn-login" style="margin-top:4px">ENTRAR</button>
+    <button class="btn btn-primary" id="btn-login">ENTRAR</button>
     <div id="login-error"></div>
     <div class="forgot-link" id="btn-forgot">Esqueci minha senha →</div>
-    <div id="reset-panel">
+    <div id="reset-panel" style="display:none">
       <p>Solicite ao <b>Administrador</b> que redefina sua senha.</p>
     </div>
   </div>
 </div>
 
-<!-- TELA DE SELEÇÃO DE PADARIA (só para DONO) -->
-
-<div id="padaria-select-screen">
+<!-- SELEÇÃO DE PADARIA (Dono) -->
+<div id="padaria-select-screen" style="display:none">
   <div class="psel-header">
-    <img src="logo.png" alt="PegPão" class="psel-logo" onerror="this.style.display='none'">
+    <img src="assets/logo.png" alt="PegPão" class="psel-logo"
+         onerror="this.style.display='none'">
     <div class="psel-title">Rede PegPão</div>
     <div class="psel-sub" id="psel-greeting">Selecione a unidade</div>
   </div>
-  <div class="psel-grid" id="psel-grid">
-    <!-- preenchido via JS -->
-  </div>
-  <button class="psel-logout" id="psel-logout-btn">Sair</button>
+  <div class="psel-grid" id="psel-grid"></div>
+  <button class="psel-logout" id="psel-logout-btn">Sair da conta</button>
 </div>
 
-<!-- PAINEL DONO CONSOLIDADO -->
-
-<div id="dono-dash-screen">
-  <div class="dono-nav">
-    <img src="logo.png" alt="PegPão" onerror="this.style.display='none'">
-    <div>
-      <div class="dono-nav-title">Rede PegPão</div>
-      <div class="dono-nav-sub" id="dono-nav-sub">Painel dos Donos</div>
-    </div>
-    <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
-      <div id="btn-voltar-rede" class="btn-voltar-rede" onclick="voltarParaRede()">← Rede</div>
-      <button class="btn btn-ghost btn-sm" id="dono-logout-btn">Sair</button>
-    </div>
-  </div>
-  <div class="dono-tabs" id="dono-tabs">
-    <div class="dono-tab active" data-dono-tab="rede">🏘️ Rede</div>
-    <div class="dono-tab" data-dono-tab="relatorio">📊 Relatórios</div>
-    <div class="dono-tab" data-dono-tab="usuarios">👥 Usuários</div>
-  </div>
-  <div class="dono-body">
-    <!-- Aba Rede -->
-    <div class="dono-page active" id="dono-page-rede">
-      <div id="rede-grid" class="rede-grid"></div>
-    </div>
-    <!-- Aba Relatórios consolidados -->
-    <div class="dono-page" id="dono-page-relatorio">
-      <div id="dono-rel-content">
-        <div class="empty">Selecione uma padaria na aba Rede para ver relatórios detalhados.</div>
-      </div>
-    </div>
-    <!-- Aba Usuários -->
-    <div class="dono-page" id="dono-page-usuarios">
-      <div class="card accent-blue">
-        <div class="card-title">Novo usuário</div>
-        <div class="field"><label>Nome completo</label><input type="text" id="dono-new-user-nome" placeholder="Ex: João Silva" autocomplete="off"></div>
-        <div class="field"><label>Email</label><input type="email" id="dono-new-user-login" placeholder="email@exemplo.com" autocomplete="off"></div>
-        <div class="field"><label>Senha inicial</label><input type="password" id="dono-new-user-pass" placeholder="Mínimo 6 caracteres"></div>
-        <div class="field"><label>Nível de acesso</label>
-          <select id="dono-new-user-nivel">
-            <option value="DONO">👑 Dono — acesso a todas as unidades</option>
-            <option value="ADMIN">🔴 Admin — acesso total a uma unidade</option>
-            <option value="GERENTE">🟡 Gerente — entrada, saída e estoque</option>
-            <option value="OPERADOR">🟢 Operador — apenas saídas</option>
-          </select>
-        </div>
-        <div class="field" id="dono-user-padaria-field">
-          <label>Padaria responsável <span style="color:var(--muted);font-weight:400">(exceto Dono)</span></label>
-          <select id="dono-new-user-padaria"></select>
-        </div>
-        <button class="btn btn-blue btn-sm" id="dono-btn-criar-usuario" style="width:auto;padding:10px 24px">+ CRIAR USUÁRIO</button>
-      </div>
-      <div class="card" style="padding:0;overflow:hidden">
-        <div style="padding:14px 16px;border-bottom:1px solid var(--border)">
-          <div class="card-title" style="margin-bottom:0">Usuários cadastrados</div>
-        </div>
-        <div id="dono-lista-usuarios" style="padding:0 16px"></div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- NAV PRINCIPAL (padaria individual) -->
-
+<!-- NAV PRINCIPAL -->
 <nav class="nav" id="main-nav">
   <div class="nav-logo">
-    <img src="logo.png" alt="PegPão" onerror="this.style.display='none'">
+    <img src="assets/logo.png" alt="PegPão" onerror="this.style.display='none'">
     <div class="nav-padaria-label" id="nav-padaria-label"></div>
   </div>
   <div class="nav-item" data-tab="dashboard">🏠 Início</div>
@@ -475,16 +76,15 @@ body.modo-operador #sai-data-field{display:none!important}
   <div class="nav-item level-admin" data-tab="relatorio">📊 Relatórios</div>
   <div class="nav-item level-admin" data-tab="usuarios">👥 Usuários</div>
   <div class="nav-item" id="btn-nav-logout" style="margin-left:auto;color:var(--red)">
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg> Sair
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+    Sair
   </div>
 </nav>
 
 <!-- APP PRINCIPAL -->
-
 <div class="container" id="app" style="display:none">
 
   <!-- DASHBOARD -->
-
   <div id="page-dashboard" class="page">
     <div class="page-header">
       <div class="page-header-ico ico-primary">🏠</div>
@@ -509,7 +109,6 @@ body.modo-operador #sai-data-field{display:none!important}
   </div>
 
   <!-- ENTRADA -->
-
   <div id="page-entrada" class="page">
     <div class="page-header">
       <div class="page-header-ico ico-green">📥</div>
@@ -528,7 +127,7 @@ body.modo-operador #sai-data-field{display:none!important}
           <option value="FRIOS">🧀 Frios</option>
           <option value="FRIGORIFICO">🥩 Frigorífico</option>
           <option value="SECOS">📦 Secos</option>
-          <option value="EMBALAGENS">📦 Embalagens</option>
+          <option value="EMBALAGENS">🗃️ Embalagens</option>
           <option value="LIMPEZA">🧹 Limpeza</option>
           <option value="BEBIDAS">🥤 Bebidas</option>
         </select>
@@ -550,14 +149,13 @@ body.modo-operador #sai-data-field{display:none!important}
         </div>
         <div class="field"><label>Quantidade</label><input type="number" id="ent-qtd" value="1" min="0.001" step="any"></div>
       </div>
-      <div class="field"><label>Estoque mínimo <span style="color:var(--muted);font-weight:400">(alerta abaixo desse valor)</span></label><input type="number" id="ent-minimo" value="0" min="0" step="any" placeholder="0 = sem alerta"></div>
+      <div class="field"><label>Estoque mínimo</label><input type="number" id="ent-minimo" value="0" min="0" step="any" placeholder="0 = sem alerta"></div>
       <div class="field"><label>Observação <span style="color:var(--muted);font-weight:400">(opcional)</span></label><textarea id="ent-obs" placeholder="Ex: NF 1234, fornecedor X..."></textarea></div>
       <button class="btn btn-green" id="btn-entrada">✓ CONFIRMAR ENTRADA</button>
     </div>
   </div>
 
   <!-- SAÍDA -->
-
   <div id="page-saida" class="page">
     <div class="page-header">
       <div class="page-header-ico ico-red">📤</div>
@@ -577,7 +175,7 @@ body.modo-operador #sai-data-field{display:none!important}
           <div class="ac-list" id="ac-list"></div>
         </div>
       </div>
-      <div id="sai-preview-box">
+      <div id="sai-preview-box" style="display:none">
         <div style="font-size:10px;color:var(--muted);margin-bottom:4px;font-weight:700;text-transform:uppercase;letter-spacing:.8px">Produto selecionado</div>
         <div id="prev-nome" style="font-weight:700;font-size:14px;margin-bottom:8px"></div>
         <div style="display:flex;gap:8px;flex-wrap:wrap">
@@ -602,13 +200,12 @@ body.modo-operador #sai-data-field{display:none!important}
       <div class="card accent-green">
         <div class="card-title">✅ Saída registrada</div>
         <div id="recibo-content"></div>
-        <button class="btn btn-ghost" style="margin-top:12px" onclick="fecharRecibo()">Nova saída</button>
+        <button class="btn btn-ghost" style="margin-top:12px" id="btn-nova-saida">Nova saída</button>
       </div>
     </div>
   </div>
 
   <!-- ESTOQUE -->
-
   <div id="page-estoque" class="page">
     <div class="page-header">
       <div class="page-header-ico ico-gold">🗂️</div>
@@ -619,7 +216,7 @@ body.modo-operador #sai-data-field{display:none!important}
       <span class="search-icon">🔍</span>
       <input type="text" id="filtro-estoque" placeholder="Pesquisar produto...">
     </div>
-    <div id="soma-bar">
+    <div id="soma-bar" style="display:none">
       <div><div class="s-label">Total encontrado</div><div class="s-sub" id="soma-sub"></div></div>
       <div class="s-val" id="soma-val"></div>
     </div>
@@ -629,9 +226,7 @@ body.modo-operador #sai-data-field{display:none!important}
       <button class="tab-btn" data-estoque-tab="minimo">📉 Mínimo</button>
       <button class="tab-btn" data-estoque-tab="codigos">🏷️ Códigos</button>
     </div>
-    <div id="tab-lista">
-      <div id="estoque-categorias"></div>
-    </div>
+    <div id="tab-lista"><div id="estoque-categorias"></div></div>
     <div id="tab-vencimentos" style="display:none">
       <div class="section-label" style="color:var(--red)">🚨 Vencidos / até 7 dias</div>
       <div class="card" style="padding:0;overflow:hidden">
@@ -656,25 +251,23 @@ body.modo-operador #sai-data-field{display:none!important}
   </div>
 
   <!-- DIÁRIO -->
-
   <div id="page-diario" class="page">
     <div class="page-header">
       <div class="page-header-ico ico-blue">📋</div>
       <div><div class="page-header-title">Diário</div><div class="page-header-sub">Movimentações por data</div></div>
       <div style="display:flex;gap:8px;margin-left:auto">
-        <button class="btn btn-ghost btn-sm level-admin" id="btn-export-completo" title="Backup completo">📦 Backup</button>
+        <button class="btn btn-ghost btn-sm level-admin" id="btn-export-completo">📦 Backup</button>
         <button class="btn btn-ghost btn-sm" id="btn-export-diario">⬇ XLSX</button>
       </div>
     </div>
     <div class="card">
       <div class="field"><label>Data</label><input type="date" id="data-diario"></div>
-      <div style="display:flex;gap:10px;margin-top:4px" id="diario-totais"></div>
+      <div style="display:flex;gap:10px;margin-top:4px;flex-wrap:wrap" id="diario-totais"></div>
     </div>
     <div id="lista-diario"></div>
   </div>
 
   <!-- RELATÓRIOS -->
-
   <div id="page-relatorio" class="page">
     <div class="page-header">
       <div class="page-header-ico ico-gold">📊</div>
@@ -690,8 +283,7 @@ body.modo-operador #sai-data-field{display:none!important}
     <div class="card"><div class="card-title">Mais recebidos</div><div id="rank-entradas"></div></div>
   </div>
 
-  <!-- USUÁRIOS (admin da padaria) -->
-
+  <!-- USUÁRIOS -->
   <div id="page-usuarios" class="page">
     <div class="page-header">
       <div class="page-header-ico ico-blue">👥</div>
@@ -704,11 +296,32 @@ body.modo-operador #sai-data-field{display:none!important}
       <div class="field"><label>Senha inicial</label><input type="password" id="new-user-pass" placeholder="Mínimo 6 caracteres"></div>
       <div class="field"><label>Nível de acesso</label>
         <select id="new-user-nivel">
+          <option value="ADMIN">🔴 Admin — acesso total a esta padaria</option>
           <option value="GERENTE">🟡 Gerente — entrada, saída, estoque e diário</option>
           <option value="OPERADOR">🟢 Operador — apenas saídas</option>
         </select>
       </div>
       <button class="btn btn-blue btn-sm" id="btn-criar-usuario" style="width:auto;padding:10px 24px">+ CRIAR USUÁRIO</button>
+    </div>
+    <!-- Painel Dono: criar para qualquer padaria -->
+    <div class="card accent-primary" id="dono-criar-usuario-card" style="display:none">
+      <div class="card-title">👑 Criar usuário Dono</div>
+      <div class="field"><label>Nome completo</label><input type="text" id="dono-new-user-nome" autocomplete="off"></div>
+      <div class="field"><label>Email</label><input type="email" id="dono-new-user-login" autocomplete="off"></div>
+      <div class="field"><label>Senha inicial</label><input type="password" id="dono-new-user-pass"></div>
+      <div class="field"><label>Nível</label>
+        <select id="dono-new-user-nivel">
+          <option value="DONO">👑 Dono</option>
+          <option value="ADMIN">🔴 Admin</option>
+          <option value="GERENTE">🟡 Gerente</option>
+          <option value="OPERADOR">🟢 Operador</option>
+        </select>
+      </div>
+      <div class="field" id="dono-padaria-field">
+        <label>Padaria responsável</label>
+        <select id="dono-new-user-padaria"></select>
+      </div>
+      <button class="btn btn-primary btn-sm" id="btn-criar-usuario-dono" style="width:auto;padding:10px 24px">+ CRIAR</button>
     </div>
     <div class="card" style="padding:0;overflow:hidden">
       <div style="padding:14px 16px;border-bottom:1px solid var(--border)">
@@ -721,7 +334,6 @@ body.modo-operador #sai-data-field{display:none!important}
 </div><!-- /container -->
 
 <!-- MODAL EDITAR PRODUTO -->
-
 <div class="modal-bg" id="edit-modal">
   <div class="modal-box">
     <div class="modal-head">
@@ -737,7 +349,7 @@ body.modo-operador #sai-data-field{display:none!important}
         <option value="FRIOS">🧀 Frios</option>
         <option value="FRIGORIFICO">🥩 Frigorífico</option>
         <option value="SECOS">📦 Secos</option>
-        <option value="EMBALAGENS">📦 Embalagens</option>
+        <option value="EMBALAGENS">🗃️ Embalagens</option>
         <option value="LIMPEZA">🧹 Limpeza</option>
         <option value="BEBIDAS">🥤 Bebidas</option>
       </select>
@@ -747,7 +359,7 @@ body.modo-operador #sai-data-field{display:none!important}
         <select id="edit-unidade">
           <option value="kg">kg</option>
           <option value="g">g</option>
-          <option value="L">Litro (L)</option>
+          <option value="L">L</option>
           <option value="ml">ml</option>
           <option value="un">un</option>
           <option value="cx">cx</option>
@@ -770,7 +382,6 @@ body.modo-operador #sai-data-field{display:none!important}
 </div>
 
 <!-- MODAL CONFIRMAR SAÍDA -->
-
 <div class="modal-bg" id="confirm-modal" style="align-items:center">
   <div class="modal-box" style="border-radius:20px;max-width:380px;padding:28px 24px 32px">
     <div class="modal-head" style="margin-top:0">
@@ -790,7 +401,6 @@ body.modo-operador #sai-data-field{display:none!important}
 </div>
 
 <!-- MODAL HISTÓRICO -->
-
 <div class="modal-bg" id="hist-modal">
   <div class="modal-box">
     <div class="modal-head">
@@ -802,7 +412,6 @@ body.modo-operador #sai-data-field{display:none!important}
 </div>
 
 <!-- MODAL TROCAR SENHA -->
-
 <div class="modal-bg" id="passwd-modal" style="align-items:center">
   <div class="modal-box" style="border-radius:20px;max-width:380px;padding:28px 24px 32px">
     <div class="modal-head" style="margin-top:0">
@@ -816,1205 +425,19 @@ body.modo-operador #sai-data-field{display:none!important}
   </div>
 </div>
 
-<div id="theme-btn">🌙</div>
+<div id="theme-btn" style="display:none">🌙</div>
 <div id="toast"></div>
 
-<script>
-// ══════════════════════════════════════════════════════════
-// FIREBASE CONFIG
-// ══════════════════════════════════════════════════════════
-const firebaseConfig = {
-  apiKey:            "AIzaSyBjIveFv6Vl9XzvX3XQ9a10UCL0dV_4B9M",
-  authDomain:        "estoque-pegpao.firebaseapp.com",
-  databaseURL:       "https://estoque-pegpao-default-rtdb.firebaseio.com",
-  projectId:         "estoque-pegpao",
-  storageBucket:     "estoque-pegpao.firebasestorage.app",
-  messagingSenderId: "233197174747",
-  appId:             "1:233197174747:web:1812fb1dd8e69cc962b1fe",
-  measurementId:     "G-RQC66W5SNP"
-};
-firebase.initializeApp(firebaseConfig);
-const db   = firebase.database();
-const auth = firebase.auth();
-
-// ══════════════════════════════════════════════════════════
-// PADARIAS DA REDE
-// ══════════════════════════════════════════════════════════
-const PADARIAS = [
-  { id:'mongagua_1',    nome:'Mongaguá 1',    cidade:'Mongaguá',   ico:'🍞', ativo:true },
-  { id:'mongagua_2',    nome:'Mongaguá 2',    cidade:'Mongaguá',   ico:'🍞', ativo:true },
-  { id:'itanhaem_1',    nome:'Itanhaém 1',    cidade:'Itanhaém',   ico:'🥐', ativo:true },
-  { id:'itanhaem_2',    nome:'Itanhaém 2',    cidade:'Itanhaém',   ico:'🥐', ativo:true },
-  { id:'itanhaem_3',    nome:'Itanhaém 3',    cidade:'Itanhaém',   ico:'🥐', ativo:true },
-  { id:'peruibe_1',     nome:'Peruíbe 1',     cidade:'Peruíbe',    ico:'🥖', ativo:true },
-  { id:'saovicente_1',  nome:'São Vicente',   cidade:'São Vicente', ico:'🧇', ativo:true },
-  { id:'praiagde_1',    nome:'Praia Grande',  cidade:'Praia Grande',ico:'🏖️', ativo:false }
-];
-
-const CATEGORIAS = {
-  FARINHAS:   { label:'Farinhas',   ico:'🌾' },
-  FRIOS:      { label:'Frios',      ico:'🧀' },
-  FRIGORIFICO:{ label:'Frigorífico',ico:'🥩' },
-  SECOS:      { label:'Secos',      ico:'📦' },
-  EMBALAGENS: { label:'Embalagens', ico:'🗃️' },
-  LIMPEZA:    { label:'Limpeza',    ico:'🧹' },
-  BEBIDAS:    { label:'Bebidas',    ico:'🥤' }
-};
-
-// ══════════════════════════════════════════════════════════
-// NÍVEIS  OPERADOR < GERENTE < ADMIN < DONO
-// ══════════════════════════════════════════════════════════
-const NIVEL = { OPERADOR:1, GERENTE:2, ADMIN:3, DONO:4 };
-function podeAcessar(n){ return (NIVEL[userLevel]||0) >= (NIVEL[n]||99); }
-
-// ══════════════════════════════════════════════════════════
-// STATE
-// ══════════════════════════════════════════════════════════
-let userLevel      = null;
-let currentUser    = null;
-let currentPadariaId = null; // padaria em que o usuário está operando
-let cache          = {};
-let cacheReady     = false;
-let cacheUnsub     = null;
-let usuariosCache  = {};
-let qrInst={}, qrOn={};
-let acItems=[], acIdx=-1;
-let editCode=null;
-let relPeriod='semana';
-let estoqueTabAtual='lista';
-let confirmCallback=null;
-let passwdTargetUid=null;
-let darkMode = localStorage.getItem('tema') !== 'light';
-
-// ══════════════════════════════════════════════════════════
-// HELPERS
-// ══════════════════════════════════════════════════════════
-function dataLocal(d){
-  const dt=d||new Date();
-  return dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0');
-}
-function diasVencer(v){
-  if(!v) return null;
-  const [y,m,d]=v.split('-').map(Number);
-  const hoje=new Date(); hoje.setHours(0,0,0,0);
-  return Math.ceil((new Date(y,m-1,d)-hoje)/86400000);
-}
-function toast(msg,type){
-  const el=document.getElementById('toast');
-  el.textContent=msg; el.className='show '+(type||'ok');
-  clearTimeout(el._t); el._t=setTimeout(()=>el.className='',3400);
-}
-function saudacao(){
-  const h=new Date().getHours();
-  return h<12?'Bom dia':h<18?'Boa tarde':'Boa noite';
-}
-function nivelLabel(nivel){
-  if(nivel==='DONO')    return '<span class="badge b-primary">Dono</span>';
-  if(nivel==='ADMIN')   return '<span class="badge b-red">Admin</span>';
-  if(nivel==='GERENTE') return '<span class="badge b-yellow">Gerente</span>';
-  return '<span class="badge b-green">Operador</span>';
-}
-function nomePadaria(pid){
-  const p=PADARIAS.find(x=>x.id===pid);
-  return p?p.nome:pid||'—';
-}
-function barcodeVisual(code){
-  let x=0,bars='',seed=code.split('').reduce((a,c)=>a+c.charCodeAt(0),0);
-  const n=Math.max(code.length,8)*11,unit=160/n;
-  for(let i=0;i<n;i++){const w=unit*(1+((seed*(i+1)*7)%3));if(i%2===0)bars+=`<rect x="${x.toFixed(1)}" y="0" width="${w.toFixed(1)}" height="40" fill="#e8eaf0"/>`;x+=w;}
-  return `<svg viewBox="0 0 ${x.toFixed(0)} 40" xmlns="http://www.w3.org/2000/svg" style="background:#0d0f14;width:100%;height:50px">${bars}</svg>`;
-}
-
-// ══════════════════════════════════════════════════════════
-// TEMA
-// ══════════════════════════════════════════════════════════
-if(!darkMode) document.body.classList.add('light');
-
-// ══════════════════════════════════════════════════════════
-// DOM READY
-// ══════════════════════════════════════════════════════════
-document.addEventListener('DOMContentLoaded', () => {
-  // Login
-  document.getElementById('btn-login').addEventListener('click', login);
-  document.getElementById('inp-pass').addEventListener('keydown', e=>{ if(e.key==='Enter') login(); });
-  document.getElementById('btn-forgot').addEventListener('click', ()=>{
-    const p=document.getElementById('reset-panel');
-    p.style.display=p.style.display==='none'||!p.style.display?'block':'none';
-  });
-
-  // Logout dono
-  document.getElementById('dono-logout-btn').addEventListener('click',()=>auth.signOut());
-  document.getElementById('psel-logout-btn').addEventListener('click',()=>auth.signOut());
-
-  // Dono tabs
-  document.querySelectorAll('.dono-tab[data-dono-tab]').forEach(el=>{
-    el.addEventListener('click',()=>switchDonoTab(el.dataset.donoTab));
-  });
-
-  // Nav padaria
-  document.querySelectorAll('.nav-item[data-tab]').forEach(el=>{
-    el.addEventListener('click',()=>switchTab(el.dataset.tab));
-  });
-  document.getElementById('btn-nav-logout').addEventListener('click',()=>{
-    if(podeAcessar('DONO')){
-      // Dono volta para tela de seleção
-      esconderApp();
-      mostrarPainelDono();
-    } else {
-      auth.signOut();
-    }
-  });
-
-  // Operações
-  document.getElementById('btn-entrada').addEventListener('click',()=>processar('ENTRADA'));
-  document.getElementById('btn-saida').addEventListener('click',()=>processarSaida());
-
-  // QR
-  document.getElementById('qr-toggle-entrada').addEventListener('click',()=>toggleQR('entrada'));
-  document.getElementById('qr-toggle-saida').addEventListener('click',()=>toggleQR('saida'));
-
-  // Autocomplete
-  const saiBusca=document.getElementById('sai-busca');
-  saiBusca.addEventListener('input',onSaiBuscaInput);
-  saiBusca.addEventListener('keydown',onSaiBuscaKeydown);
-  saiBusca.addEventListener('blur',()=>setTimeout(()=>{document.getElementById('ac-list').style.display='none';},180));
-
-  // Estoque
-  document.getElementById('filtro-estoque').addEventListener('input',renderEstoque);
-  document.querySelectorAll('.tab-btn[data-estoque-tab]').forEach(btn=>{
-    btn.addEventListener('click',()=>{
-      document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
-      btn.classList.add('active');
-      switchEstoqueTab(btn.dataset.estoqueTab);
-    });
-  });
-
-  // Export
-  document.getElementById('btn-export-csv').addEventListener('click',exportarEstoqueCSV);
-  document.getElementById('btn-export-diario').addEventListener('click',exportarDiarioXLSX);
-  document.getElementById('btn-export-completo').addEventListener('click',exportarBackupCompleto);
-
-  // Diário
-  document.getElementById('data-diario').addEventListener('change',renderDiario);
-
-  // Relatório
-  document.querySelectorAll('.pt[data-period]').forEach(btn=>{
-    btn.addEventListener('click',()=>{
-      relPeriod=btn.dataset.period;
-      document.querySelectorAll('.pt').forEach(b=>b.classList.remove('active'));
-      btn.classList.add('active');
-      renderRelatorio();
-    });
-  });
-
-  // Modais
-  document.getElementById('btn-modal-close').addEventListener('click',fecharModal);
-  document.getElementById('btn-modal-cancel').addEventListener('click',fecharModal);
-  document.getElementById('btn-modal-save').addEventListener('click',salvarEdicao);
-  document.getElementById('edit-modal').addEventListener('click',e=>{if(e.target===document.getElementById('edit-modal'))fecharModal();});
-  document.getElementById('btn-ver-historico').addEventListener('click',()=>{if(editCode)abrirHistorico(editCode);});
-  document.addEventListener('click',e=>{
-    const btn=e.target.closest('[data-edit-code]');
-    if(btn) abrirEditar(btn.dataset.editCode);
-  });
-  document.getElementById('btn-confirm-close').addEventListener('click',fecharConfirm);
-  document.getElementById('btn-confirm-cancel').addEventListener('click',fecharConfirm);
-  document.getElementById('btn-confirm-ok').addEventListener('click',()=>{ const fn=confirmCallback; fecharConfirm(); if(fn)fn(); });
-  document.getElementById('confirm-modal').addEventListener('click',e=>{if(e.target===document.getElementById('confirm-modal'))fecharConfirm();});
-  document.getElementById('btn-hist-close').addEventListener('click',()=>document.getElementById('hist-modal').classList.remove('open'));
-  document.getElementById('hist-modal').addEventListener('click',e=>{if(e.target===document.getElementById('hist-modal'))document.getElementById('hist-modal').classList.remove('open');});
-  document.getElementById('btn-passwd-close').addEventListener('click',()=>document.getElementById('passwd-modal').classList.remove('open'));
-  document.getElementById('passwd-modal').addEventListener('click',e=>{if(e.target===document.getElementById('passwd-modal'))document.getElementById('passwd-modal').classList.remove('open');});
-  document.getElementById('btn-passwd-save').addEventListener('click',salvarSenhaAdmin);
-
-  // Usuários
-  document.getElementById('btn-criar-usuario').addEventListener('click',criarUsuario);
-  document.getElementById('dono-btn-criar-usuario').addEventListener('click',criarUsuarioDono);
-
-  // Nivel muda campo padaria no form dono
-  document.getElementById('dono-new-user-nivel').addEventListener('change',()=>{
-    const v=document.getElementById('dono-new-user-nivel').value;
-    document.getElementById('dono-user-padaria-field').style.display=v==='DONO'?'none':'';
-  });
-
-  // Preenche select de padarias no form dono
-  const selPad=document.getElementById('dono-new-user-padaria');
-  PADARIAS.filter(p=>p.ativo).forEach(p=>{
-    const o=document.createElement('option'); o.value=p.id; o.textContent=p.nome; selPad.appendChild(o);
-  });
-
-  // Theme
-  const tb=document.getElementById('theme-btn');
-  tb.addEventListener('click',()=>{
-    darkMode=!darkMode;
-    document.body.classList.toggle('light',!darkMode);
-    tb.textContent=darkMode?'🌙':'☀️';
-    localStorage.setItem('tema',darkMode?'dark':'light');
-  });
-
-  // Inatividade
-  let inactivityTimer;
-  function resetTimer(){
-    clearTimeout(inactivityTimer);
-    inactivityTimer=setTimeout(()=>{
-      toast('Sessão encerrada por inatividade.','warn');
-      setTimeout(()=>auth.signOut(),2000);
-    },8*60*60*1000);
-  }
-  ['click','keydown','touchstart'].forEach(e=>document.addEventListener(e,resetTimer,{passive:true}));
-  resetTimer();
-});
-
-// ══════════════════════════════════════════════════════════
-// FIREBASE AUTH
-// ══════════════════════════════════════════════════════════
-const authTimeout=setTimeout(()=>{
-  const loading=document.getElementById('auth-loading');
-  if(loading&&loading.style.display!=='none'){
-    loading.style.display='none';
-    document.getElementById('login-screen').style.display='flex';
-  }
-},10000);
-
-let authResolved=false;
-
-auth.onAuthStateChanged(async firebaseUser=>{
-  if(authResolved&&firebaseUser&&currentUser) return;
-  if(authResolved&&!firebaseUser) authResolved=false;
-
-  clearTimeout(authTimeout);
-  const loading=document.getElementById('auth-loading');
-
-  if(!firebaseUser){
-    loading.style.display='none';
-    esconderTudo();
-    document.getElementById('login-screen').style.display='flex';
-    document.getElementById('theme-btn').style.display='none';
-    if(cacheUnsub){cacheUnsub();cacheUnsub=null;}
-    cache={};cacheReady=false;userLevel=null;currentUser=null;currentPadariaId=null;
-    return;
-  }
-
-  try{
-    const snap=await db.ref('config/usuarios/'+firebaseUser.uid).once('value');
-    const perfil=snap.val();
-    if(!perfil||perfil.ativo===false){
-      await auth.signOut();
-      mostrarErroLogin('Acesso negado. Conta inativa ou não cadastrada.');
-      return;
-    }
-
-    userLevel=perfil.nivel||'OPERADOR';
-    currentUser={
-      uid:firebaseUser.uid,
-      email:firebaseUser.email,
-      nome:perfil.nome||firebaseUser.email.split('@')[0],
-      padaria_id:perfil.padaria_id||null
-    };
-
-    db.ref('auditoria/login_ok').push({uid:currentUser.uid,email:currentUser.email,nivel:userLevel,ts:Date.now()});
-
-    loading.style.display='none';
-    const tb=document.getElementById('theme-btn');
-    tb.style.display='flex';
-    tb.textContent=darkMode?'🌙':'☀️';
-    authResolved=true;
-
-    if(podeAcessar('DONO')){
-      // Dono vai para o painel de seleção
-      mostrarPainelDono();
-    } else {
-      // Usuário normal vai direto para sua padaria
-      currentPadariaId=currentUser.padaria_id;
-      if(!currentPadariaId){
-        await auth.signOut();
-        mostrarErroLogin('Usuário sem padaria atribuída. Contate o administrador.');
-        return;
-      }
-      iniciarAppPadaria(currentPadariaId);
-    }
-
-  }catch(err){
-    console.error(err);
-    await auth.signOut();
-    mostrarErroLogin('Erro ao verificar perfil: '+err.message);
-  }
-});
-
-// ══════════════════════════════════════════════════════════
-// TELAS
-// ══════════════════════════════════════════════════════════
-function esconderTudo(){
-  document.getElementById('padaria-select-screen').style.display='none';
-  document.getElementById('dono-dash-screen').style.display='none';
-  document.getElementById('main-nav').style.display='none';
-  document.getElementById('app').style.display='none';
-}
-function esconderApp(){
-  document.getElementById('main-nav').style.display='none';
-  document.getElementById('app').style.display='none';
-  if(cacheUnsub){cacheUnsub();cacheUnsub=null;}
-  cache={};cacheReady=false;currentPadariaId=null;
-}
-
-function mostrarPainelDono(){
-  esconderTudo();
-  document.getElementById('padaria-select-screen').style.display='flex';
-  renderPadariaSelect();
-}
-
-function renderPadariaSelect(){
-  document.getElementById('psel-greeting').textContent=saudacao()+', '+currentUser.nome+'!';
-  const grid=document.getElementById('psel-grid');
-  grid.innerHTML='';
-  PADARIAS.forEach(p=>{
-    const card=document.createElement('div');
-    card.className='psel-card'+(p.ativo?'':' coming-soon');
-    card.innerHTML=`
-      <div class="psel-ico">${p.ico}</div>
-      <div class="psel-nome">${p.nome}</div>
-      <div class="psel-cidade">${p.cidade}</div>
-      ${!p.ativo?'<div class="psel-coming">Em breve</div>':''}
-      <div class="psel-alerts" id="psel-alerts-${p.id}"></div>
-    `;
-    if(p.ativo) card.addEventListener('click',()=>abrirPadariaComoDono(p.id));
-    grid.appendChild(card);
-    if(p.ativo) carregarAlertasPadaria(p.id);
-  });
-}
-
-async function carregarAlertasPadaria(pid){
-  const snap=await db.ref('padarias/'+pid+'/estoque').once('value').catch(()=>null);
-  if(!snap||!snap.exists()) return;
-  let alertas=0,baixos=0;
-  snap.forEach(c=>{
-    const v=c.val(); if(!v) return;
-    const d=diasVencer(v.validade);
-    if(d!==null&&d<=7) alertas++;
-    if(v.minimo>0&&Number(v.saldo||0)<Number(v.minimo||0)) baixos++;
-  });
-  const el=document.getElementById('psel-alerts-'+pid);
-  if(!el) return;
-  let html='';
-  if(alertas>0) html+=`<span class="psel-badge-mini b-red">${alertas} venc</span>`;
-  if(baixos>0)  html+=`<span class="psel-badge-mini b-yellow">${baixos} baixo</span>`;
-  el.innerHTML=html;
-}
-
-function abrirPadariaComoDono(pid){
-  currentPadariaId=pid;
-  document.getElementById('padaria-select-screen').style.display='none';
-  iniciarAppPadaria(pid);
-}
-
-function voltarParaRede(){
-  esconderApp();
-  mostrarPainelDono();
-}
-
-function iniciarAppPadaria(pid){
-  const padaria=PADARIAS.find(p=>p.id===pid);
-  document.getElementById('main-nav').style.display='flex';
-  document.getElementById('app').style.display='block';
-  document.getElementById('nav-padaria-label').textContent=padaria?padaria.nome:pid;
-  // Botão de voltar só aparece para dono
-  document.getElementById('btn-nav-logout').innerHTML=podeAcessar('DONO')?
-    '← Rede':'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg> Sair';
-  aplicarNivel();
-  carregarCache(pid);
-  switchTab(userLevel==='OPERADOR'?'saida':'dashboard');
-}
-
-// ══════════════════════════════════════════════════════════
-// PAINEL DONO (aba dentro do dono-dash)
-// Nota: por ora usamos a tela de seleção direto.
-// A função abaixo é mantida para o tab de rede/relatório no futuro.
-// ══════════════════════════════════════════════════════════
-function switchDonoTab(tab){
-  document.querySelectorAll('.dono-tab').forEach(t=>t.classList.remove('active'));
-  document.querySelector(`.dono-tab[data-dono-tab="${tab}"]`).classList.add('active');
-  document.querySelectorAll('.dono-page').forEach(p=>p.classList.remove('active'));
-  document.getElementById('dono-page-'+tab).classList.add('active');
-  if(tab==='usuarios') renderUsuariosDono();
-  if(tab==='rede') renderRedeCards();
-}
-
-async function renderRedeCards(){
-  const grid=document.getElementById('rede-grid'); grid.innerHTML='';
-  for(const p of PADARIAS){
-    const card=document.createElement('div');
-    card.className='rede-card'+(p.ativo?'':' coming');
-    let metricsHtml='<div class="rede-metrics"><div class="rede-metric"><div class="rm-v" style="color:var(--muted)">—</div><div class="rm-l">Produtos</div></div><div class="rede-metric"><div class="rm-v" style="color:var(--muted)">—</div><div class="rm-l">Alertas</div></div><div class="rede-metric"><div class="rm-v" style="color:var(--muted)">—</div><div class="rm-l">Baixo</div></div></div>';
-    card.innerHTML=`<div class="rede-card-header"><div class="rede-card-ico">${p.ico}</div><div><div class="rede-card-nome">${p.nome}</div><div class="rede-card-sub">${p.cidade}</div></div>${p.ativo?`<div class="rede-enter-btn" onclick="abrirPadariaComoDono('${p.id}')">Entrar →</div>`:''}</div>${metricsHtml}${!p.ativo?'<div style="font-size:11px;color:var(--amber);margin-top:10px;font-weight:700">🏖️ Em breve</div>':''}`;
-    grid.appendChild(card);
-  }
-}
-
-// ══════════════════════════════════════════════════════════
-// LOGIN
-// ══════════════════════════════════════════════════════════
-let loginAttempts=0, loginBloqueado=false;
-function mostrarErroLogin(msg){
-  const el=document.getElementById('login-error');
-  el.textContent=msg; el.style.display='block';
-  document.getElementById('auth-loading').style.display='none';
-  document.getElementById('login-screen').style.display='flex';
-}
-function login(){
-  if(loginBloqueado){toast('Aguarde antes de tentar novamente.','err');return;}
-  const email=document.getElementById('inp-email').value.trim().toLowerCase();
-  const pass=document.getElementById('inp-pass').value;
-  const errEl=document.getElementById('login-error');
-  errEl.style.display='none';
-  if(!email||!pass) return;
-  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){errEl.textContent='Email inválido.';errEl.style.display='block';return;}
-  document.getElementById('login-screen').style.display='none';
-  document.getElementById('auth-loading').style.display='flex';
-  auth.signInWithEmailAndPassword(email,pass)
-    .then(()=>{loginAttempts=0;})
-    .catch(err=>{
-      loginAttempts++;
-      if(loginAttempts>=5){
-        loginBloqueado=true;
-        setTimeout(()=>{loginBloqueado=false;loginAttempts=0;},30000);
-        mostrarErroLogin('Bloqueado por 30s após 5 tentativas.');
-      } else {
-        mostrarErroLogin((err.code==='auth/wrong-password'||err.code==='auth/user-not-found')?`Email ou senha incorretos. (${loginAttempts}/5)`:'Erro: '+err.message);
-      }
-      db.ref('auditoria/login_falha').push({email,ts:Date.now(),tentativa:loginAttempts});
-    });
-}
-
-// ══════════════════════════════════════════════════════════
-// NÍVEL DE ACESSO
-// ══════════════════════════════════════════════════════════
-function aplicarNivel(){
-  // Gerente pode fazer entrada e ver diário
-  document.querySelectorAll('.level-gerente,.level-gerente-field').forEach(el=>{
-    el.style.display=podeAcessar('GERENTE')?'':'none';
-  });
-  document.querySelectorAll('.level-admin').forEach(el=>{
-    el.style.display=podeAcessar('ADMIN')?'':'none';
-  });
-  if(userLevel==='OPERADOR'){
-    document.body.classList.add('modo-operador');
-    document.querySelectorAll('.nav-item[data-tab]').forEach(el=>{
-      el.style.display=el.dataset.tab==='saida'?'':'none';
-    });
-    document.querySelector('.nav-logo').style.display='none';
-  } else {
-    document.body.classList.remove('modo-operador');
-    if(podeAcessar('GERENTE')){
-      const df=document.getElementById('sai-data-field');
-      if(df) df.style.display='';
-      const ob=document.getElementById('sai-obs-required');
-      if(ob) ob.style.display='none';
-    }
-  }
-}
-
-// ══════════════════════════════════════════════════════════
-// CACHE REALTIME (por padaria)
-// ══════════════════════════════════════════════════════════
-function carregarCache(pid){
-  db.ref('config/usuarios').once('value').then(snap=>{
-    snap.forEach(u=>{const v=u.val();if(v&&v.email)usuariosCache[v.email]=v.nome||v.email.split('@')[0];});
-  });
-  if(cacheUnsub) cacheUnsub();
-  const ref=db.ref('padarias/'+pid+'/estoque');
-  const handler=snap=>{
-    cache={};
-    snap.forEach(c=>{
-      const v=c.val(); if(!v) return;
-      cache[c.key]={nome:v.nome||c.key,saldo:Number(v.saldo)||0,setor:v.setor||'SECOS',validade:v.validade||'',unidade:v.unidade||'un',minimo:Number(v.minimo)||0};
-    });
-    cacheReady=true;
-    atualizarBadgeNav();
-    if(document.getElementById('page-estoque').classList.contains('active'))   renderEstoque();
-    if(document.getElementById('page-relatorio').classList.contains('active')) renderRelatorio();
-    if(document.getElementById('page-dashboard').classList.contains('active')) renderDashboard();
-  };
-  ref.on('value',handler,err=>{console.error('[Cache]',err);toast('Erro Firebase: '+err.code,'err');});
-  cacheUnsub=()=>ref.off('value',handler);
-}
-
-// ══════════════════════════════════════════════════════════
-// BADGE NAV
-// ══════════════════════════════════════════════════════════
-function atualizarBadgeNav(){
-  const temAlerta=Object.values(cache).some(i=>{
-    const d=diasVencer(i.validade);
-    return (d!==null&&d<=7)||(i.minimo>0&&i.saldo<i.minimo);
-  });
-  document.getElementById('nav-badge-estoque').style.display=temAlerta?'block':'none';
-}
-
-// ══════════════════════════════════════════════════════════
-// NAVEGAÇÃO
-// ══════════════════════════════════════════════════════════
-async function switchTab(tab){
-  if(userLevel==='OPERADOR'&&tab!=='saida'){toast('Acesso não autorizado.','err');return;}
-  const permMap={entrada:'GERENTE',diario:'GERENTE',relatorio:'ADMIN',usuarios:'ADMIN'};
-  if(permMap[tab]&&!podeAcessar(permMap[tab])){toast('Acesso não autorizado.','err');return;}
-  for(const k of Object.keys(qrInst)){
-    if(qrOn[k]){await qrInst[k].stop().catch(()=>{});qrOn[k]=false;document.getElementById('qr-wrap-'+k).style.display='none';document.querySelector('#qr-toggle-'+k+' span').textContent='Usar câmera / QR Code';}
-  }
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
-  document.getElementById('page-'+tab).classList.add('active');
-  const navEl=document.querySelector(`.nav-item[data-tab="${tab}"]`);
-  if(navEl) navEl.classList.add('active');
-  if(tab==='dashboard') renderDashboard();
-  if(tab==='estoque')   renderEstoque();
-  if(tab==='diario')    {document.getElementById('data-diario').value=dataLocal();renderDiario();}
-  if(tab==='relatorio') renderRelatorio();
-  if(tab==='usuarios')  renderUsuarios();
-  if(tab==='saida'){
-    const labelEl=document.getElementById('sai-data-label');
-    if(labelEl){const h=new Date();labelEl.textContent=h.toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});}
-    fecharRecibo();
-  }
-}
-
-// ══════════════════════════════════════════════════════════
-// DASHBOARD
-// ══════════════════════════════════════════════════════════
-function renderDashboard(){
-  const padaria=PADARIAS.find(p=>p.id===currentPadariaId);
-  document.getElementById('dash-greeting').textContent=saudacao()+'!';
-  document.getElementById('dash-user-label').textContent=currentUser.nome+' · '+(padaria?padaria.nome:'');
-  const itens=Object.values(cache);
-  const vencidos=itens.filter(i=>{const d=diasVencer(i.validade);return d!==null&&d<=0;});
-  const vencendo=itens.filter(i=>{const d=diasVencer(i.validade);return d!==null&&d>0&&d<=7;});
-  const baixos=itens.filter(i=>i.minimo>0&&i.saldo<i.minimo);
-  const alertDiv=document.getElementById('dash-alert');
-  const lowDiv=document.getElementById('dash-low');
-  if(vencidos.length||vencendo.length){
-    alertDiv.style.display='block';
-    document.getElementById('dash-alert-list').innerHTML=[...vencidos.map(i=>`<div class="dash-alert-item"><span>${i.nome}</span><span style="color:var(--red);font-weight:700;font-family:'JetBrains Mono',monospace">VENCIDO</span></div>`),...vencendo.map(i=>`<div class="dash-alert-item"><span>${i.nome}</span><span style="color:var(--amber);font-family:'JetBrains Mono',monospace">${diasVencer(i.validade)}d</span></div>`)].join('')||'';
-  } else alertDiv.style.display='none';
-  if(baixos.length){
-    lowDiv.style.display='block';
-    document.getElementById('dash-low-list').innerHTML=baixos.map(i=>`<div class="dash-alert-item"><span>${i.nome}</span><span style="color:var(--amber);font-family:'JetBrains Mono',monospace">${i.saldo}/${i.minimo} ${i.unidade}</span></div>`).join('');
-  } else lowDiv.style.display='none';
-  document.getElementById('dash-metrics').innerHTML=`
-    <div class="dash-box" onclick="switchTab('estoque')"><div class="dl">Produtos</div><div class="dv gold">${itens.length}</div><div class="ds">no estoque</div></div>
-    <div class="dash-box" onclick="switchTab('estoque')"><div class="dl">Unidades</div><div class="dv">${itens.reduce((s,i)=>s+(i.saldo||0),0)}</div><div class="ds">total em estoque</div></div>
-    <div class="dash-box" onclick="switchTab('estoque')"><div class="dl">Vencendo</div><div class="dv ${vencidos.length+vencendo.length>0?'red':'green'}">${vencidos.length+vencendo.length}</div><div class="ds">em 7 dias</div></div>
-    <div class="dash-box" onclick="switchTab('estoque')"><div class="dl">Abaixo mín.</div><div class="dv ${baixos.length>0?'amber':'green'}">${baixos.length}</div><div class="ds">itens</div></div>
-  `;
-  db.ref('padarias/'+currentPadariaId+'/logs/'+dataLocal()).once('value').then(snap=>{
-    const logs=[];
-    if(snap.exists()) snap.forEach(l=>{const v=l.val();if(v)logs.push(v);});
-    logs.sort((a,b)=>b.ts-a.ts);
-    document.getElementById('dash-recent').innerHTML=logs.slice(0,8).map(v=>`
-      <div class="recent-log">
-        <div><div class="recent-log-nome">${v.nome||'—'} <span class="badge ${v.tipo==='ENTRADA'?'b-green':'b-red'}" style="font-size:9px">${v.tipo==='ENTRADA'?'+'+v.qtd:'-'+v.qtd} ${v.unidade||''}</span></div>
-        ${v.obs?`<div style="font-size:11px;color:var(--muted);margin-top:2px">${v.obs}</div>`:''}
-        </div>
-        <div class="recent-log-hora">${v.hora||''}</div>
-      </div>`).join('')||'<div class="empty">Nenhuma movimentação hoje.</div>';
-  });
-}
-
-// ══════════════════════════════════════════════════════════
-// QR
-// ══════════════════════════════════════════════════════════
-async function toggleQR(key){
-  const wrap=document.getElementById('qr-wrap-'+key);
-  const spanEl=document.querySelector('#qr-toggle-'+key+' span');
-  if(qrOn[key]){await qrInst[key].stop().catch(()=>{});qrOn[key]=false;wrap.style.display='none';spanEl.textContent='Usar câmera / QR Code';return;}
-  wrap.style.display='block';spanEl.textContent='Fechar câmera';
-  if(!qrInst[key]) qrInst[key]=new Html5Qrcode('qr-reader-'+key);
-  qrInst[key].start({facingMode:'environment'},{fps:15,qrbox:{width:250,height:180}},
-    text=>{
-      if(key==='entrada'){document.getElementById('ent-code').value=text;if(cache[text]){document.getElementById('ent-nome').value=cache[text].nome;document.getElementById('ent-setor').value=cache[text].setor;}}
-      else{selecionarItem(text);}
-      qrInst[key].stop().catch(()=>{});qrOn[key]=false;wrap.style.display='none';spanEl.textContent='Usar câmera / QR Code';
-    },()=>{}
-  ).then(()=>qrOn[key]=true).catch(()=>{toast('Câmera indisponível','err');wrap.style.display='none';});
-}
-
-// ══════════════════════════════════════════════════════════
-// AUTOCOMPLETE
-// ══════════════════════════════════════════════════════════
-function onSaiBuscaInput(){
-  const val=document.getElementById('sai-busca').value.trim().toLowerCase();
-  document.getElementById('sai-code').value='';
-  document.getElementById('sai-preview-box').style.display='none';
-  acIdx=-1;
-  if(!val){document.getElementById('ac-list').style.display='none';return;}
-  if(cacheReady){buildAcList(val);return;}
-  const list=document.getElementById('ac-list');
-  list.innerHTML='<div class="ac-item" style="color:var(--muted);cursor:default">Carregando...</div>';
-  list.style.display='block';
-  db.ref('padarias/'+currentPadariaId+'/estoque').once('value').then(snap=>{
-    snap.forEach(c=>{const v=c.val();if(!v)return;cache[c.key]={nome:v.nome||c.key,saldo:Number(v.saldo)||0,setor:v.setor||'SECOS',validade:v.validade||'',unidade:v.unidade||'un',minimo:Number(v.minimo)||0};});
-    cacheReady=true;
-    const cur=document.getElementById('sai-busca').value.trim().toLowerCase();
-    if(cur)buildAcList(cur);else list.style.display='none';
-  }).catch(()=>toast('Erro ao buscar','err'));
-}
-function buildAcList(val){
-  const list=document.getElementById('ac-list');list.innerHTML='';
-  acItems=Object.entries(cache).filter(([code,item])=>(item.nome||'').toLowerCase().includes(val)||(code||'').toLowerCase().includes(val)).sort((a,b)=>(a[1].nome||'').localeCompare(b[1].nome||'')).slice(0,10);
-  if(!acItems.length){const el=document.createElement('div');el.className='ac-item';el.style.cssText='color:var(--muted);cursor:default';el.textContent='Nenhum produto encontrado';list.appendChild(el);list.style.display='block';return;}
-  acItems.forEach(([code,item])=>{
-    const el=document.createElement('div');el.className='ac-item';
-    const left=document.createElement('div');
-    const n=document.createElement('div');n.className='ac-name';n.textContent=item.nome;
-    const c=document.createElement('div');c.className='ac-code';c.textContent=code;
-    left.append(n,c);
-    const badge=document.createElement('span');badge.className='badge '+(item.saldo>0?'b-green':'b-red');badge.textContent=item.saldo+' '+(item.unidade||'un');
-    el.append(left,badge);
-    el.addEventListener('mousedown',ev=>{ev.preventDefault();selecionarItem(code);});
-    list.appendChild(el);
-  });
-  list.style.display='block';
-}
-function onSaiBuscaKeydown(ev){
-  const list=document.getElementById('ac-list');const items=list.querySelectorAll('.ac-item');
-  if(!items.length||list.style.display==='none')return;
-  if(ev.key==='ArrowDown'){acIdx=Math.min(acIdx+1,items.length-1);ev.preventDefault();}
-  else if(ev.key==='ArrowUp'){acIdx=Math.max(acIdx-1,0);ev.preventDefault();}
-  else if(ev.key==='Enter'&&acIdx>=0){ev.preventDefault();if(acItems[acIdx])selecionarItem(acItems[acIdx][0]);return;}
-  else return;
-  items.forEach((el,i)=>el.classList.toggle('sel',i===acIdx));
-  items[acIdx]?.scrollIntoView({block:'nearest'});
-}
-function selecionarItem(code){
-  const item=cache[code];if(!item){toast('Produto não encontrado','err');return;}
-  document.getElementById('sai-code').value=code;
-  document.getElementById('sai-busca').value=item.nome;
-  document.getElementById('ac-list').style.display='none';
-  document.getElementById('sai-preview-box').style.display='block';
-  document.getElementById('prev-nome').textContent=item.nome;
-  document.getElementById('prev-saldo').textContent=item.saldo+' '+(item.unidade||'un')+' em estoque';
-  document.getElementById('prev-saldo').className='badge '+(item.saldo>0?'b-green':'b-red');
-  const dias=diasVencer(item.validade);
-  const vel=document.getElementById('prev-val');
-  vel.textContent=item.validade?'Val: '+item.validade:'Sem validade';
-  vel.className='badge '+(dias!==null&&dias<=7?'b-red':dias!==null&&dias<=30?'b-yellow':'b-gray');
-  const minEl=document.getElementById('prev-min');
-  if(item.minimo>0){minEl.textContent='Mín: '+item.minimo+' '+item.unidade;minEl.style.display='';}else{minEl.style.display='none';}
-}
-
-// ══════════════════════════════════════════════════════════
-// PROCESSAR ENTRADA
-// ══════════════════════════════════════════════════════════
-function processar(tipo){
-  if(!podeAcessar('GERENTE')){toast('Acesso negado.','err');return;}
-  const qtd=parseFloat(document.getElementById('ent-qtd').value.replace(',','.'));
-  if(isNaN(qtd)||qtd<=0){toast('Quantidade inválida.','err');return;}
-  const code=document.getElementById('ent-code').value.trim();
-  const nome=document.getElementById('ent-nome').value.trim();
-  if(!code){toast('Informe o código.','err');return;}
-  if(!nome){toast('Informe o nome.','err');return;}
-  gravarMovimento('ENTRADA',code,{
-    nome,setor:document.getElementById('ent-setor').value,
-    validade:document.getElementById('ent-val').value,
-    unidade:document.getElementById('ent-unidade').value,
-    minimo:parseFloat(document.getElementById('ent-minimo').value)||0,
-    obs:document.getElementById('ent-obs').value.trim()
-  },qtd);
-}
-
-// ══════════════════════════════════════════════════════════
-// PROCESSAR SAÍDA
-// ══════════════════════════════════════════════════════════
-function processarSaida(){
-  const qtd=parseFloat(document.getElementById('sai-qtd').value.replace(',','.'));
-  if(isNaN(qtd)||qtd<=0){toast('Quantidade inválida.','err');return;}
-  let code=document.getElementById('sai-code').value.trim();
-  if(!code){
-    const busca=document.getElementById('sai-busca').value.trim().toLowerCase();
-    const found=Object.entries(cache).find(([k,v])=>k.toLowerCase()===busca||(v.nome&&v.nome.toLowerCase()===busca));
-    if(found){code=found[0];}else{toast('Selecione um produto da lista.','err');if(busca&&cacheReady)buildAcList(busca);return;}
-  }
-  const item=cache[code];
-  if(!item){toast('Produto não encontrado.','err');return;}
-  if(item.saldo<qtd){toast('Saldo insuficiente! Há apenas '+item.saldo+' '+item.unidade+'.','err');return;}
-  const obs=document.getElementById('sai-obs').value.trim();
-  if(userLevel==='OPERADOR'&&!obs){toast('Informe a finalidade da retirada.','err');document.getElementById('sai-obs').focus();return;}
-  let dataManual=null;
-  if(podeAcessar('GERENTE')){const mf=document.getElementById('sai-data-manual');dataManual=mf?mf.value:null;}
-  document.getElementById('confirm-nome').textContent=item.nome;
-  document.getElementById('confirm-det').textContent=qtd+' '+item.unidade+' · Saldo: '+item.saldo+' '+item.unidade;
-  document.getElementById('confirm-msg').textContent=obs?'Finalidade: "'+obs+'"':'Confirme a saída deste produto.';
-  document.getElementById('confirm-modal').classList.add('open');
-  confirmCallback=()=>gravarMovimento('SAIDA',code,null,qtd,dataManual,obs,item);
-}
-function fecharConfirm(){document.getElementById('confirm-modal').classList.remove('open');confirmCallback=null;}
-
-// ══════════════════════════════════════════════════════════
-// GRAVAR MOVIMENTO (gravado em padarias/{id}/...)
-// ══════════════════════════════════════════════════════════
-function gravarMovimento(tipo,code,dadosEntrada,qtd,dataManual=null,obs='',itemRef=null){
-  if(!currentPadariaId){toast('Nenhuma padaria selecionada.','err');return;}
-  if(!code||typeof code!=='string'||code.length>100){toast('Código inválido.','err');return;}
-  const pid=currentPadariaId;
-  db.ref('padarias/'+pid+'/estoque/'+code).once('value').then(snap=>{
-    const atual=snap.val();
-    if(tipo==='SAIDA'&&!atual){toast('Produto não existe.','err');return;}
-    const base=atual||{nome:dadosEntrada.nome,saldo:0,setor:dadosEntrada.setor,validade:dadosEntrada.validade,unidade:dadosEntrada.unidade||'un',minimo:dadosEntrada.minimo||0};
-    const novoSaldo=tipo==='ENTRADA'?base.saldo+qtd:base.saldo-qtd;
-    if(novoSaldo<0){toast('Saldo insuficiente!','err');return;}
-    const novosDados={
-      nome:tipo==='ENTRADA'?dadosEntrada.nome:(base.nome||''),
-      saldo:novoSaldo,
-      setor:tipo==='ENTRADA'?dadosEntrada.setor:(base.setor||'SECOS'),
-      validade:tipo==='ENTRADA'?dadosEntrada.validade:(base.validade||''),
-      unidade:tipo==='ENTRADA'?dadosEntrada.unidade:(base.unidade||'un'),
-      minimo:tipo==='ENTRADA'?(dadosEntrada.minimo||0):(base.minimo||0)
-    };
-    const dataLog=dataManual||dataLocal();
-    const logEntry={tipo,code,nome:novosDados.nome,qtd,unidade:novosDados.unidade||'un',hora:new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}),usuario:currentUser?currentUser.email:'desconhecido',ts:Date.now()};
-    if(obs) logEntry.obs=obs;
-    const updates={};
-    updates['padarias/'+pid+'/estoque/'+code]=novosDados;
-    updates['padarias/'+pid+'/logs/'+dataLog+'/'+Date.now()]=logEntry;
-    db.ref().update(updates).then(()=>{
-      toast(tipo==='ENTRADA'?'✅ Entrada registrada!':'✅ Saída registrada!');
-      if(tipo==='SAIDA'&&novosDados.minimo>0&&novoSaldo<novosDados.minimo)
-        setTimeout(()=>toast('⚠️ '+novosDados.nome+' abaixo do mínimo!','warn'),600);
-      if(tipo==='ENTRADA'){
-        ['ent-code','ent-nome','ent-val','ent-obs'].forEach(id=>document.getElementById(id).value='');
-        document.getElementById('ent-qtd').value=1;document.getElementById('ent-unidade').value='kg';document.getElementById('ent-minimo').value=0;
-      } else {
-        ['sai-code','sai-busca','sai-obs'].forEach(id=>document.getElementById(id).value='');
-        const smf=document.getElementById('sai-data-manual');if(smf)smf.value='';
-        document.getElementById('sai-qtd').value=1;
-        document.getElementById('sai-preview-box').style.display='none';
-        if(userLevel==='OPERADOR') mostrarRecibo(novosDados.nome,qtd,novosDados.unidade,obs,novoSaldo);
-      }
-      if(document.getElementById('page-dashboard').classList.contains('active')) renderDashboard();
-    }).catch(err=>{console.error(err);toast('Erro: '+(err.code||err.message),'err');});
-  }).catch(err=>{console.error(err);toast('Erro: '+(err.message||'Desconhecido'),'err');});
-}
-
-// ══════════════════════════════════════════════════════════
-// ESTOQUE
-// ══════════════════════════════════════════════════════════
-function switchEstoqueTab(tab){
-  estoqueTabAtual=tab;
-  ['lista','vencimentos','minimo','codigos'].forEach(t=>{document.getElementById('tab-'+t).style.display=t===tab?'':'none';});
-  renderEstoque();
-}
-function renderEstoque(){
-  if(!document.getElementById('page-estoque').classList.contains('active'))return;
-  const filtro=document.getElementById('filtro-estoque').value.trim().toLowerCase();
-  const itens=Object.entries(cache).filter(([code,item])=>!filtro||(item.nome||'').toLowerCase().includes(filtro)||code.toLowerCase().includes(filtro)).sort((a,b)=>(a[1].nome||'').localeCompare(b[1].nome||''));
-  const somaBar=document.getElementById('soma-bar');
-  if(filtro&&itens.length){
-    document.getElementById('soma-val').textContent=itens.reduce((s,[,i])=>s+(i.saldo||0),0);
-    document.getElementById('soma-sub').textContent=itens.length+' produto'+(itens.length!==1?'s':'');
-    somaBar.style.display='flex';
-  } else somaBar.style.display='none';
-  if(estoqueTabAtual==='lista') renderLista(itens);
-  else if(estoqueTabAtual==='vencimentos') renderVencimentos(itens);
-  else if(estoqueTabAtual==='minimo') renderMinimo(itens);
-  else renderCodigos(itens);
-}
-function renderLista(itens){
-  const container=document.getElementById('estoque-categorias');
-  container.innerHTML='';
-  // Agrupa por categoria
-  const grupos={};
-  itens.forEach(([code,item])=>{
-    const cat=item.setor||'SECOS';
-    if(!grupos[cat]) grupos[cat]=[];
-    grupos[cat].push([code,item]);
-  });
-  if(!Object.keys(grupos).length){container.innerHTML='<div class="empty">Estoque vazio</div>';return;}
-  Object.entries(grupos).sort((a,b)=>a[0].localeCompare(b[0])).forEach(([cat,items])=>{
-    const catInfo=CATEGORIAS[cat]||{label:cat,ico:'📦'};
-    container.innerHTML+=`<div class="section-label">${catInfo.ico} ${catInfo.label}</div>
-    <div class="card" style="padding:0;overflow:hidden">
-      <table><thead><tr><th>Item</th><th style="text-align:center">Qtd</th><th>Validade</th></tr></thead>
-      <tbody>${items.map(([code,item])=>{
-        const dias=diasVencer(item.validade);
-        const vc=dias!==null&&dias<=7?'venc':dias!==null&&dias<=30?'venc-soon':'';
-        const baixo=item.minimo>0&&item.saldo<item.minimo;
-        return `<tr><td><div style="display:flex;align-items:center;gap:8px"><div><b>${item.nome}</b>${baixo?` <span class="badge b-yellow" style="font-size:9px;padding:2px 6px">BAIXO</span>`:''}<div style="font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace">${code}</div></div><button class="btn-edit" data-edit-code="${code}" title="Editar">✏️</button></div></td><td style="text-align:center"><span class="badge ${item.saldo>0?'b-green':'b-red'}">${item.saldo} ${item.unidade||'un'}</span></td><td class="${vc}">${item.validade||'—'}</td></tr>`;
-      }).join('')}</tbody></table>
-    </div>`;
-  });
-}
-function renderVencimentos(itens){
-  const crit=document.getElementById('tbody-venc-crit'),aviso=document.getElementById('tbody-venc-aviso');
-  crit.innerHTML='';aviso.innerHTML='';
-  itens.forEach(([,item])=>{
-    if(!item.validade)return;const dias=diasVencer(item.validade);if(dias===null||dias>30)return;
-    const catInfo=CATEGORIAS[item.setor||'SECOS']||{label:item.setor,ico:'📦'};
-    const row=`<tr><td><b>${item.nome}</b></td><td>${catInfo.ico} ${catInfo.label}</td><td class="${dias<=7?'venc':'venc-soon'}">${item.validade} (${dias<=0?'VENCIDO':dias+'d'})</td><td style="text-align:center">${item.saldo} ${item.unidade||'un'}</td></tr>`;
-    (dias<=7?crit:aviso).innerHTML+=row;
-  });
-  if(!crit.innerHTML)crit.innerHTML='<tr><td colspan="4" class="empty">✅ Nenhum crítico</td></tr>';
-  if(!aviso.innerHTML)aviso.innerHTML='<tr><td colspan="4" class="empty">✅ Nenhum aviso</td></tr>';
-}
-function renderMinimo(itens){
-  const tbody=document.getElementById('tbody-minimo');tbody.innerHTML='';
-  const comMinimo=itens.filter(([,i])=>i.minimo>0).sort((a,b)=>a[1].saldo/a[1].minimo-b[1].saldo/b[1].minimo);
-  if(!comMinimo.length){tbody.innerHTML='<tr><td colspan="4" class="empty">Nenhum produto com mínimo definido.</td></tr>';return;}
-  comMinimo.forEach(([,item])=>{
-    const ok=item.saldo>=item.minimo,pct=Math.min((item.saldo/item.minimo*100),100).toFixed(0);
-    tbody.innerHTML+=`<tr><td><b>${item.nome}</b></td><td style="text-align:center"><span class="badge ${ok?'b-green':'b-red'}">${item.saldo} ${item.unidade||'un'}</span></td><td style="text-align:center;color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:12px">${item.minimo} ${item.unidade||'un'}</td><td style="text-align:center"><div style="background:var(--border);border-radius:4px;height:6px;width:60px;display:inline-block;overflow:hidden"><div style="height:100%;width:${pct}%;background:${ok?'var(--green)':'var(--red)'};border-radius:4px"></div></div><div style="font-size:10px;color:${ok?'var(--green)':'var(--red)'};margin-top:2px;font-family:'JetBrains Mono',monospace">${pct}%</div></td></tr>`;
-  });
-}
-function renderCodigos(itens){
-  const grid=document.getElementById('bc-grid');
-  if(!itens.length){grid.innerHTML='<div class="empty">🏷️ Nenhum produto</div>';return;}
-  grid.innerHTML=itens.map(([code,item])=>`<div class="bc-card"><div class="bc-nome">${item.nome}</div><div class="bc-code">${code}</div>${barcodeVisual(code)}<div class="bc-saldo">Saldo: <b>${item.saldo} ${item.unidade||'un'}</b></div></div>`).join('');
-}
-
-// ══════════════════════════════════════════════════════════
-// MODAL EDITAR PRODUTO
-// ══════════════════════════════════════════════════════════
-function abrirEditar(code){
-  if(!podeAcessar('GERENTE')){toast('Sem permissão.','err');return;}
-  const item=cache[code];if(!item){toast('Item não encontrado.','err');return;}
-  editCode=code;
-  document.getElementById('edit-code-label').textContent='Código: '+code;
-  document.getElementById('edit-nome').value=item.nome||'';
-  document.getElementById('edit-val').value=item.validade||'';
-  document.getElementById('edit-setor').value=item.setor||'SECOS';
-  document.getElementById('edit-unidade').value=item.unidade||'un';
-  document.getElementById('edit-saldo').value=item.saldo||0;
-  document.getElementById('edit-minimo').value=item.minimo||0;
-  document.getElementById('edit-modal').classList.add('open');
-}
-function fecharModal(){document.getElementById('edit-modal').classList.remove('open');editCode=null;}
-function salvarEdicao(){
-  if(!editCode)return;
-  if(!podeAcessar('GERENTE')){toast('Sem permissão.','err');return;}
-  const nome=document.getElementById('edit-nome').value.trim();
-  const validade=document.getElementById('edit-val').value;
-  const setor=document.getElementById('edit-setor').value;
-  const unidade=document.getElementById('edit-unidade').value;
-  const saldo=parseFloat(document.getElementById('edit-saldo').value)||0;
-  const minimo=parseFloat(document.getElementById('edit-minimo').value)||0;
-  if(!nome){toast('Informe o nome.','err');return;}
-  db.ref('padarias/'+currentPadariaId+'/estoque/'+editCode).update({nome,validade,setor,unidade,saldo,minimo}).then(()=>{
-    toast('✅ Produto atualizado!');fecharModal();
-    db.ref('auditoria/edicoes').push({code:editCode,nome,padaria:currentPadariaId,feito_por:currentUser?currentUser.email:'',ts:Date.now()});
-  }).catch(err=>toast('Erro: '+err.code,'err'));
-}
-
-// ══════════════════════════════════════════════════════════
-// HISTÓRICO
-// ══════════════════════════════════════════════════════════
-async function abrirHistorico(code){
-  document.getElementById('hist-title').textContent='📜 Histórico: '+(cache[code]?cache[code].nome:code);
-  document.getElementById('hist-list').innerHTML='<div class="empty">Carregando...</div>';
-  document.getElementById('hist-modal').classList.add('open');
-  const hoje=new Date();
-  const proms=[];
-  for(let i=0;i<30;i++){const d=new Date(hoje);d.setDate(d.getDate()-i);proms.push(db.ref('padarias/'+currentPadariaId+'/logs/'+dataLocal(d)).once('value'));}
-  const snaps=await Promise.all(proms);
-  const logs=[];
-  snaps.forEach(s=>s.forEach(l=>{const v=l.val();if(v&&v.code===code)logs.push(v);}));
-  logs.sort((a,b)=>(b.ts||0)-(a.ts||0));
-  if(!logs.length){document.getElementById('hist-list').innerHTML='<div class="empty">Sem movimentações nos últimos 30 dias.</div>';return;}
-  document.getElementById('hist-list').innerHTML=logs.slice(0,40).map(v=>`
-    <div class="hist-item">
-      <div>
-        <div class="hist-qty" style="color:${v.tipo==='ENTRADA'?'var(--green)':'var(--red)'}">${v.tipo==='ENTRADA'?'+':'-'}${v.qtd} ${v.unidade||''}</div>
-        <div class="hist-nome">${v.obs||v.tipo}</div>
-      </div>
-      <div class="hist-meta">${v.hora||''}<br>${usuariosCache[v.usuario]||v.usuario||''}</div>
-    </div>`).join('');
-}
-
-// ══════════════════════════════════════════════════════════
-// DIÁRIO
-// ══════════════════════════════════════════════════════════
-async function renderDiario(){
-  const data=document.getElementById('data-diario').value;
-  if(!data)return;
-  document.getElementById('lista-diario').innerHTML='<div class="empty">Carregando...</div>';
-  const snap=await db.ref('padarias/'+currentPadariaId+'/logs/'+data).once('value').catch(()=>null);
-  if(!snap||!snap.exists()){document.getElementById('lista-diario').innerHTML='<div class="empty">Nenhuma movimentação nesta data.</div>';document.getElementById('diario-totais').innerHTML='';return;}
-  const logs=[];snap.forEach(l=>{const v=l.val();if(v)logs.push({...v,_key:l.key});});
-  logs.sort((a,b)=>b._key-a._key);
-  let totE=0,totS=0;
-  logs.forEach(v=>{if(v.tipo==='ENTRADA')totE+=Number(v.qtd)||0;else totS+=Number(v.qtd)||0;});
-  document.getElementById('diario-totais').innerHTML=`
-    <span class="badge b-green">+${totE} entradas</span>
-    <span class="badge b-red">-${totS} saídas</span>
-    <span class="badge b-gray">${logs.length} registros</span>`;
-  document.getElementById('lista-diario').innerHTML=logs.map(v=>`
-    <div class="log-card">
-      <div>
-        <div class="log-hora">${v.hora||''} · ${usuariosCache[v.usuario]||v.usuario||''}</div>
-        <div class="log-nome">${v.nome||'—'}</div>
-        ${v.obs?`<div class="log-obs">${v.obs}</div>`:''}
-      </div>
-      <div class="log-qty" style="color:${v.tipo==='ENTRADA'?'var(--green)':'var(--red)'}">${v.tipo==='ENTRADA'?'+':'-'}${v.qtd} <span style="font-size:11px;font-weight:400;color:var(--muted)">${v.unidade||''}</span></div>
-    </div>`).join('');
-}
-
-// ══════════════════════════════════════════════════════════
-// RELATÓRIOS
-// ══════════════════════════════════════════════════════════
-async function renderRelatorio(){
-  const itens=Object.values(cache);
-  const venc7=itens.filter(i=>{const d=diasVencer(i.validade);return d!==null&&d<=7;}).length;
-  document.getElementById('rel-stats').innerHTML=`
-    <div class="stat-box"><div class="sl">Produtos</div><div class="sv">${itens.length}</div></div>
-    <div class="stat-box"><div class="sl">Unidades</div><div class="sv">${itens.reduce((s,i)=>s+(i.saldo||0),0)}</div></div>
-    <div class="stat-box"><div class="sl">Vencendo</div><div class="sv${venc7>0?' red':''}">${venc7}</div></div>
-    <div class="stat-box"><div class="sl">Categorias</div><div class="sv">${new Set(itens.map(i=>i.setor)).size}</div></div>`;
-  const dias=relPeriod==='semana'?7:relPeriod==='mes'?30:365;
-  const saidas={},entradas={};
-  const proms=[];
-  for(let i=0;i<dias;i++){const d=new Date();d.setDate(d.getDate()-i);proms.push(db.ref('padarias/'+currentPadariaId+'/logs/'+dataLocal(d)).once('value'));}
-  const snaps=await Promise.all(proms);
-  snaps.forEach(s=>s.forEach(l=>{
-    const v=l.val();if(!v||!v.code)return;
-    const key=v.code,nomeCurrent=(cache[key]&&cache[key].nome)?cache[key].nome:(v.nome||key),unid=(cache[key]&&cache[key].unidade)?cache[key].unidade:(v.unidade||'un');
-    if(v.tipo==='SAIDA'){if(!saidas[key])saidas[key]={nome:nomeCurrent,qtd:0,unidade:unid};saidas[key].qtd+=Number(v.qtd)||0;}
-    else{if(!entradas[key])entradas[key]={nome:nomeCurrent,qtd:0,unidade:unid};entradas[key].qtd+=Number(v.qtd)||0;}
-  }));
-  renderRanking('rank-saidas',saidas,'var(--red)');
-  renderRanking('rank-entradas',entradas,'var(--green)');
-}
-function renderRanking(id,data,cor){
-  const el=document.getElementById(id);
-  const sorted=Object.values(data).sort((a,b)=>b.qtd-a.qtd).slice(0,10);
-  if(!sorted.length){el.innerHTML='<div class="empty">Sem dados no período.</div>';return;}
-  const max=sorted[0].qtd;
-  el.innerHTML=sorted.map((item,i)=>`<div class="rank-item"><div class="rank-n">${i+1}</div><div class="rank-bar-wrap"><div class="rank-nome">${item.nome}</div><div class="rank-bar"><div class="rank-fill" style="width:${(item.qtd/max*100).toFixed(0)}%;background:${cor}"></div></div></div><div class="rank-qty" style="color:${cor}">${item.qtd} <span style="font-size:10px;font-weight:400;color:var(--muted)">${item.unidade}</span></div></div>`).join('');
-}
-
-// ══════════════════════════════════════════════════════════
-// EXPORTAR
-// ══════════════════════════════════════════════════════════
-function exportarEstoqueCSV(){
-  const itens=Object.entries(cache);
-  if(!itens.length){toast('Estoque vazio.','warn');return;}
-  const linhas=[['Código','Nome','Categoria','Quantidade','Unidade','Mínimo','Validade'],...itens.map(([c,i])=>[c,i.nome,i.setor,i.saldo,i.unidade,i.minimo,i.validade||''])];
-  const csv=linhas.map(l=>l.map(v=>'"'+String(v||'').replace(/"/g,'""')+'"').join(',')).join('\n');
-  const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});
-  const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='estoque_'+nomePadaria(currentPadariaId).replace(/\s/g,'_')+'_'+dataLocal()+'.csv';a.click();URL.revokeObjectURL(url);
-  toast('✅ CSV exportado!');
-}
-async function exportarDiarioXLSX(){
-  const data=document.getElementById('data-diario').value;if(!data){toast('Selecione uma data.','warn');return;}
-  const snap=await db.ref('padarias/'+currentPadariaId+'/logs/'+data).once('value');
-  if(!snap.exists()){toast('Sem dados nesta data.','warn');return;}
-  const rows=[['Hora','Tipo','Nome','Código','Qtd','Unidade','Finalidade','Usuário']];
-  snap.forEach(l=>{const v=l.val();if(v)rows.push([v.hora||'',v.tipo||'',v.nome||'',v.code||'',v.qtd||0,v.unidade||'',v.obs||'',v.usuario||'']);});
-  const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(rows),'Diário');
-  XLSX.writeFile(wb,'diario_'+nomePadaria(currentPadariaId).replace(/\s/g,'_')+'_'+data+'.xlsx');
-  toast('✅ XLSX exportado!');
-}
-async function exportarBackupCompleto(){
-  if(!podeAcessar('ADMIN')){toast('Acesso negado.','err');return;}
-  toast('Gerando backup...','warn');
-  const snap=await db.ref('padarias/'+currentPadariaId+'/logs').once('value');
-  const wb=XLSX.utils.book_new();
-  if(!snap.exists()){toast('Sem logs.','warn');return;}
-  const datas=Object.keys(snap.val()||{}).sort();
-  datas.forEach(dt=>{
-    const rows=[['Hora','Tipo','Nome','Código','Qtd','Unidade','Finalidade','Usuário']];
-    const daySnap=snap.child(dt);
-    daySnap.forEach(l=>{const v=l.val();if(v)rows.push([v.hora||'',v.tipo||'',v.nome||'',v.code||'',v.qtd||0,v.unidade||'',v.obs||'',v.usuario||'']);});
-    XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(rows),dt.replace(/-/g,''));
-  });
-  XLSX.writeFile(wb,'backup_'+nomePadaria(currentPadariaId).replace(/\s/g,'_')+'_'+dataLocal()+'.xlsx');
-  toast('✅ Backup gerado — '+datas.length+' dias!');
-}
-
-// ══════════════════════════════════════════════════════════
-// USUÁRIOS (admin de padaria)
-// ══════════════════════════════════════════════════════════
-function renderUsuarios(){
-  if(!podeAcessar('ADMIN'))return;
-  document.getElementById('usuarios-page-sub').textContent='Usuários — '+nomePadaria(currentPadariaId);
-  db.ref('config/usuarios').once('value').then(snap=>{
-    const cont=document.getElementById('lista-usuarios');
-    if(!snap.exists()){cont.innerHTML='<div class="empty">Nenhum usuário.</div>';return;}
-    let html='';
-    snap.forEach(u=>{
-      const uid=u.key,ud=u.val(),ativo=ud.ativo!==false,isMe=currentUser&&uid===currentUser.uid;
-      // Admin de padaria só vê usuários da sua padaria (exceto si mesmo e donos)
-      if(!podeAcessar('DONO')&&ud.padaria_id&&ud.padaria_id!==currentPadariaId&&!isMe)return;
-      html+=`<div class="user-item">
-        <div>
-          <div class="user-name">${ud.nome||ud.email||uid} ${isMe?'<span style="font-size:10px;color:var(--muted)">(você)</span>':''}</div>
-          <div class="user-level">${nivelLabel(ud.nivel||'OPERADOR')} <span style="font-size:11px;color:var(--muted)">${ud.email||''}</span> ${ativo?'':'<span class="badge b-red" style="font-size:9px">INATIVO</span>'}</div>
-          ${ud.padaria_id?`<div style="font-size:10px;color:var(--muted);margin-top:2px">📍 ${nomePadaria(ud.padaria_id)}</div>`:''}
-        </div>
-        <div class="user-actions">
-          ${!isMe?`<button class="btn btn-ghost btn-sm" onclick="toggleAtivoUsuario('${uid}',${ativo},'${ud.email||''}')">${ativo?'🚫':'✅'}</button>`:''}
-          <button class="btn btn-ghost btn-sm" onclick="abrirTrocarSenha('${uid}','${ud.email||''}')">🔑</button>
-          ${!isMe?`<button class="btn btn-sm" style="background:var(--red-dim);border:1px solid rgba(224,82,82,.3);color:var(--red)" onclick="confirmarApagarUsuario('${uid}','${ud.nome||ud.email||uid}')">🗑️</button>`:''}
-        </div>
-      </div>`;
-    });
-    cont.innerHTML=html||'<div class="empty">Nenhum usuário desta padaria.</div>';
-  });
-}
-
-function criarUsuario(){
-  if(!podeAcessar('ADMIN')){toast('Acesso negado.','err');return;}
-  const nome=document.getElementById('new-user-nome').value.trim();
-  const email=document.getElementById('new-user-login').value.trim().toLowerCase();
-  const pass=document.getElementById('new-user-pass').value;
-  const nivel=document.getElementById('new-user-nivel').value;
-  if(!nome){toast('Informe o nome.','err');return;}
-  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){toast('Email inválido.','err');return;}
-  if(pass.length<6){toast('Senha mínimo 6 caracteres.','err');return;}
-  const secApp=firebase.initializeApp(firebaseConfig,'sec_'+Date.now());
-  const secAuth=secApp.auth();
-  secAuth.createUserWithEmailAndPassword(email,pass).then(cred=>{
-    return db.ref('config/usuarios/'+cred.user.uid).set({nome,email,nivel,ativo:true,padaria_id:currentPadariaId,criadoPor:currentUser?currentUser.email:'',criadoEm:Date.now()})
-      .then(()=>secAuth.signOut().then(()=>secApp.delete()))
-      .then(()=>{
-        toast('✅ Usuário criado: '+nome);
-        ['new-user-nome','new-user-login','new-user-pass'].forEach(id=>document.getElementById(id).value='');
-        renderUsuarios();
-      });
-  }).catch(err=>{
-    secAuth.signOut().catch(()=>{});secApp.delete().catch(()=>{});
-    toast(err.code==='auth/email-already-in-use'?'Email já cadastrado.':'Erro: '+err.message,'err');
-  });
-}
-
-// ══════════════════════════════════════════════════════════
-// USUÁRIOS (dono — cria para qualquer padaria)
-// ══════════════════════════════════════════════════════════
-function renderUsuariosDono(){
-  db.ref('config/usuarios').once('value').then(snap=>{
-    const cont=document.getElementById('dono-lista-usuarios');
-    if(!snap.exists()){cont.innerHTML='<div class="empty">Nenhum usuário.</div>';return;}
-    let html='';
-    snap.forEach(u=>{
-      const uid=u.key,ud=u.val(),ativo=ud.ativo!==false,isMe=currentUser&&uid===currentUser.uid;
-      html+=`<div class="user-item">
-        <div>
-          <div class="user-name">${ud.nome||ud.email||uid} ${isMe?'<span style="font-size:10px;color:var(--muted)">(você)</span>':''}</div>
-          <div class="user-level">${nivelLabel(ud.nivel||'OPERADOR')} <span style="font-size:11px;color:var(--muted)">${ud.email||''}</span> ${ativo?'':'<span class="badge b-red" style="font-size:9px">INATIVO</span>'}</div>
-          ${ud.padaria_id?`<div style="font-size:10px;color:var(--muted);margin-top:2px">📍 ${nomePadaria(ud.padaria_id)}</div>`:''}
-        </div>
-        <div class="user-actions">
-          ${!isMe?`<button class="btn btn-ghost btn-sm" onclick="toggleAtivoUsuario('${uid}',${ativo},'${ud.email||''}')" title="${ativo?'Inativar':'Ativar'}">${ativo?'🚫':'✅'}</button>`:''}
-          <button class="btn btn-ghost btn-sm" onclick="abrirTrocarSenha('${uid}','${ud.email||''}')">🔑</button>
-          ${!isMe?`<button class="btn btn-sm" style="background:var(--red-dim);border:1px solid rgba(224,82,82,.3);color:var(--red)" onclick="confirmarApagarUsuarioDono('${uid}','${ud.nome||ud.email||uid}')">🗑️</button>`:''}
-        </div>
-      </div>`;
-    });
-    cont.innerHTML=html||'<div class="empty">Nenhum usuário cadastrado.</div>';
-  });
-}
-
-function criarUsuarioDono(){
-  if(!podeAcessar('DONO')){toast('Acesso negado.','err');return;}
-  const nome=document.getElementById('dono-new-user-nome').value.trim();
-  const email=document.getElementById('dono-new-user-login').value.trim().toLowerCase();
-  const pass=document.getElementById('dono-new-user-pass').value;
-  const nivel=document.getElementById('dono-new-user-nivel').value;
-  const padaria_id=nivel==='DONO'?null:document.getElementById('dono-new-user-padaria').value;
-  if(!nome){toast('Informe o nome.','err');return;}
-  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){toast('Email inválido.','err');return;}
-  if(pass.length<6){toast('Senha mínimo 6 caracteres.','err');return;}
-  const secApp=firebase.initializeApp(firebaseConfig,'sec_'+Date.now());
-  const secAuth=secApp.auth();
-  secAuth.createUserWithEmailAndPassword(email,pass).then(cred=>{
-    const perfil={nome,email,nivel,ativo:true,criadoPor:currentUser?currentUser.email:'',criadoEm:Date.now()};
-    if(padaria_id) perfil.padaria_id=padaria_id;
-    return db.ref('config/usuarios/'+cred.user.uid).set(perfil)
-      .then(()=>secAuth.signOut().then(()=>secApp.delete()))
-      .then(()=>{
-        toast('✅ Usuário criado: '+nome);
-        ['dono-new-user-nome','dono-new-user-login','dono-new-user-pass'].forEach(id=>document.getElementById(id).value='');
-        renderUsuariosDono();
-      });
-  }).catch(err=>{
-    secAuth.signOut().catch(()=>{});secApp.delete().catch(()=>{});
-    toast(err.code==='auth/email-already-in-use'?'Email já cadastrado.':'Erro: '+err.message,'err');
-  });
-}
-
-function toggleAtivoUsuario(uid,ativoAtual,email){
-  if(!podeAcessar('ADMIN')){toast('Acesso negado.','err');return;}
-  if(currentUser&&uid===currentUser.uid){toast('Não pode inativar a si mesmo.','err');return;}
-  db.ref('config/usuarios/'+uid).update({ativo:!ativoAtual}).then(()=>{
-    toast(ativoAtual?'🚫 Usuário inativado.':'✅ Usuário ativado.');
-    renderUsuarios();renderUsuariosDono();
-  }).catch(err=>toast('Erro: '+err.code,'err'));
-}
-
-function confirmarApagarUsuarioDono(uid,nome){
-  if(!podeAcessar('DONO')){toast('Acesso negado.','err');return;}
-  if(currentUser&&uid===currentUser.uid){toast('Não pode apagar a si mesmo.','err');return;}
-  if(confirm('Remover usuário "'+nome+'"? O acesso será bloqueado imediatamente.')){
-    apagarUsuario(uid,nome);
-  }
-}
-
-function confirmarApagarUsuario(uid,nome){
-  if(!podeAcessar('ADMIN')){toast('Acesso negado.','err');return;}
-  if(currentUser&&uid===currentUser.uid){toast('Não pode apagar a si mesmo.','err');return;}
-  if(confirm('Remover usuário "'+nome+'"?')){apagarUsuario(uid,nome);}
-}
-
-function apagarUsuario(uid,nome){
-  db.ref('config/usuarios/'+uid).remove().then(()=>{
-    toast('🗑️ Usuário removido: '+nome);
-    renderUsuarios();renderUsuariosDono();
-  }).catch(err=>toast('Erro: '+err.code,'err'));
-}
-
-function abrirTrocarSenha(uid,email){
-  passwdTargetUid={uid,email};
-  document.getElementById('passwd-user-label').textContent='Alterando senha de: '+email;
-  document.getElementById('passwd-new').value='';
-  document.getElementById('passwd-confirm').value='';
-  document.getElementById('passwd-modal').classList.add('open');
-}
-function salvarSenhaAdmin(){
-  if(!passwdTargetUid)return;
-  if(!podeAcessar('ADMIN')){toast('Acesso negado.','err');return;}
-  const nova=document.getElementById('passwd-new').value;
-  const conf=document.getElementById('passwd-confirm').value;
-  if(nova.length<6){toast('Mínimo 6 caracteres.','err');return;}
-  if(nova!==conf){toast('Senhas não conferem.','err');return;}
-  const secApp=firebase.initializeApp(firebaseConfig,'pw_'+Date.now());
-  db.ref('config/usuarios/'+passwdTargetUid.uid).update({
-    senha_reset_pendente:true,nova_senha_hash:btoa(nova),
-    reset_solicitado_por:currentUser?currentUser.email:'',reset_ts:Date.now()
-  }).then(()=>{
-    secApp.delete().catch(()=>{});
-    toast('✅ Reset de senha solicitado.');
-    document.getElementById('passwd-modal').classList.remove('open');
-  }).catch(err=>{secApp.delete().catch(()=>{});toast('Erro: '+err.code,'err');});
-}
-
-// ══════════════════════════════════════════════════════════
-// RECIBO
-// ══════════════════════════════════════════════════════════
-function mostrarRecibo(nome,qtd,unidade,obs,novoSaldo){
-  const hora=new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
-  const data=new Date().toLocaleDateString('pt-BR',{weekday:'short',day:'numeric',month:'short'});
-  document.getElementById('recibo-content').innerHTML=`
-    <div class="recibo-row"><span class="recibo-label">Produto</span><span class="recibo-val">${nome}</span></div>
-    <div class="recibo-row"><span class="recibo-label">Quantidade</span><span class="recibo-val" style="color:var(--red)">-${qtd} ${unidade}</span></div>
-    <div class="recibo-row"><span class="recibo-label">Finalidade</span><span class="recibo-val" style="font-size:13px">${obs}</span></div>
-    <div class="recibo-row"><span class="recibo-label">Saldo restante</span><span class="recibo-val" style="color:${novoSaldo>0?'var(--green)':'var(--red)'}">${novoSaldo} ${unidade}</span></div>
-    <div class="recibo-row"><span class="recibo-label">Horário</span><span class="recibo-val" style="font-size:13px">${data} · ${hora}</span></div>`;
-  document.getElementById('recibo-box').style.display='block';
-  document.querySelector('#page-saida .card.accent-red').style.display='none';
-  document.querySelector('#page-saida .qr-toggle').style.display='none';
-  document.getElementById('qr-wrap-saida').style.display='none';
-}
-function fecharRecibo(){
-  document.getElementById('recibo-box').style.display='none';
-  const card=document.querySelector('#page-saida .card.accent-red');
-  const toggle=document.querySelector('#page-saida .qr-toggle');
-  if(card)card.style.display='';if(toggle)toggle.style.display='';
-}
-</script>
-
+<!-- JS modules -->
+<script src="js/config.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/app.js"></script>
+<script src="js/estoque.js"></script>
+<script src="js/movimentos.js"></script>
+<script src="js/diario.js"></script>
+<script src="js/relatorio.js"></script>
+<script src="js/usuarios.js"></script>
+<script src="js/main.js"></script>
 </body>
 </html>
