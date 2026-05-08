@@ -1,0 +1,26 @@
+{
+  "name": "Rede PegPão — Estoque",
+  "short_name": "PegPão",
+  "description": "Sistema de controle de estoque da Rede de Padarias PegPão",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#1a0a06",
+  "theme_color": "#1a0a06",
+  "icons": [
+    {
+      "src": "assets/logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "assets/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["business", "productivity"],
+  "lang": "pt-BR"
+}
