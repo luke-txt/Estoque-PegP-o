@@ -1025,3 +1025,31 @@ select option { background:var(--surface2); }
 }
 #theme-btn:hover { transform:scale(1.1); }
 .empty-state { text-align:center; padding:28px 20px; color:var(--muted); font-size:13px; }
+
+/* ══ BANNER OFFLINE ══ */
+#offline-banner {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 9998;
+  background: linear-gradient(135deg, #2d1a00, #3d2600);
+  border-bottom: 1px solid rgba(212,148,58,.3);
+  padding: calc(env(safe-area-inset-top) + 8px) 16px 8px;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  text-align: center;
+  animation: slideDown .3s ease;
+}
+@keyframes slideDown {
+  from { transform: translateY(-100%); }
+  to   { transform: translateY(0); }
+}
+#offline-banner span {
+  font-size: 12px; font-weight: 600;
+  color: var(--amber); letter-spacing: .3px;
+}
+#offline-banner .ob-sub {
+  font-size: 10px; color: var(--muted);
+  font-weight: 400; letter-spacing: .3px;
+}
