@@ -1,5 +1,5 @@
 // ══════════════════════════════════════════════
-// config.js — Firebase + Constantes da Rede
+// config.js — Firebase + Offline + Constantes
 // ══════════════════════════════════════════════
 
 const firebaseConfig = {
@@ -17,7 +17,43 @@ firebase.initializeApp(firebaseConfig);
 const db   = firebase.database();
 const auth = firebase.auth();
 
-// ── Padarias ──────────────────────────────────
+// ── Persistência offline ──────────────────────
+// Guarda dados localmente e sincroniza quando
+// a internet voltar. Funciona automaticamente.
+firebase.database().goOnline();
+try {
+  firebase.database().enablePersistence
+    ? firebase.database().enablePersistence({ synchronizeTabs: true })
+        .catch(err => {
+          if (err.code === 'failed-precondition') {
+            // Múltiplas abas abertas — só uma pode ter persistência
+            console.warn('[Firebase] Persistência offline não disponível (múltiplas abas).');
+          } else if (err.code === 'unimplemented') {
+            console.warn('[Firebase] Este navegador não suporta persistência offline.');
+          }
+        })
+    : null;
+} catch(e) {
+  // Realtime Database compat já inclui persistência via keepSynced
+}
+
+// Mantém dados sincronizados mesmo offline para
+// as rotas mais usadas (estoque e logs de hoje)
+// Isso é ativado dinamicamente no app.js quando
+// uma padaria é selecionada via keepSynced(true)
+
+// ── Indicador de conexão ──────────────────────
+// Detecta se está online/offline e avisa o usuário
+const connRef = firebase.database().ref('.info/connected');
+connRef.on('value', snap => {
+  const online = snap.val();
+  const banner = document.getElementById('offline-banner');
+  if (banner) {
+    banner.style.display = online ? 'none' : 'flex';
+  }
+});
+
+// ── Padarias da Rede ──────────────────────────
 const PADARIAS = [
   { id:'mongagua_1',   nome:'Mongaguá 1',   cidade:'Mongaguá',    ico:'🌊', ativo:true  },
   { id:'mongagua_2',   nome:'Mongaguá 2',   cidade:'Mongaguá',    ico:'🌊', ativo:true  },
